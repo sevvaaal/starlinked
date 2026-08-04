@@ -1,6 +1,4 @@
-import random
-
-from . import tmdb_client
+from . import filters, tmdb_client
 from .cache import pool_cache
 from .config import Settings
 
@@ -32,6 +30,10 @@ async def _fetch_tv_pool(settings: Settings) -> list[dict]:
             page=page, vote_count_gte=settings.pool_vote_count_gte
         )
         for item in data.get("results", []):
+            # discover already excludes these genres; re-check in case a title
+            # carries one alongside a scripted genre.
+            if filters.has_excluded_genre(item.get("genre_ids")):
+                continue
             items.append(
                 {
                     "id": item["id"],
@@ -60,7 +62,3 @@ async def get_media_pool(settings: Settings) -> list[dict]:
 
     pool_cache.set(POOL_KEY, pool)
     return pool
-
-
-def pick_random_pair(pool: list[dict]) -> tuple[dict, dict]:
-    return tuple(random.sample(pool, 2))

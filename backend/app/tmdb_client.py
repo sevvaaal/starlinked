@@ -1,5 +1,6 @@
 import httpx
 
+from . import filters
 from .config import get_settings
 
 
@@ -30,6 +31,15 @@ async def get_tv_credits(series_id: int) -> dict:
     return await _get(f"/tv/{series_id}/credits")
 
 
+async def get_tv_aggregate_credits(series_id: int) -> dict:
+    """Cast across *all* episodes, not just the latest season.
+
+    This is what surfaces recurring/supporting players — plain /credits only
+    lists the current season's series regulars.
+    """
+    return await _get(f"/tv/{series_id}/aggregate_credits")
+
+
 async def get_person_combined_credits(person_id: int) -> dict:
     return await _get(f"/person/{person_id}/combined_credits")
 
@@ -53,5 +63,6 @@ async def discover_tv(page: int, vote_count_gte: int) -> dict:
             "vote_count.gte": vote_count_gte,
             "page": page,
             "include_null_first_air_dates": "false",
+            "without_genres": filters.EXCLUDED_TV_GENRES_PARAM,
         },
     )
