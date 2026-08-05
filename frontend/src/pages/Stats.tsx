@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { clearStats, formatDuration, getSummary } from '../stats'
 import { clearDaily, getDailyStats, puzzleDateNow } from '../daily'
+import { BADGES, evaluateUnlockedBadges } from '../achievements'
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString('tr-TR', {
@@ -18,6 +19,7 @@ export default function Stats() {
   const [confirming, setConfirming] = useState(false)
   const summary = getSummary()
   const dailyStats = getDailyStats(puzzleDateNow())
+  const unlockedIds = new Set(evaluateUnlockedBadges().map((badge) => badge.id))
 
   function handleClear() {
     clearStats()
@@ -25,6 +27,29 @@ export default function Stats() {
     setConfirming(false)
     setVersion((v) => v + 1)
   }
+
+  const badgeGallery = (
+    <section className="doc-section">
+      <h2 className="section-title">Rozetlerin</h2>
+      <div className="badge-grid">
+        {BADGES.map((badge) => {
+          const unlocked = unlockedIds.has(badge.id)
+          return (
+            <div
+              key={badge.id}
+              className={`badge-chip${unlocked ? ` badge-chip--${badge.tone}` : ' is-locked'}`}
+            >
+              <span className="badge-chip-icon" aria-hidden="true">
+                {badge.icon}
+              </span>
+              <span className="badge-chip-title">{badge.title}</span>
+              <span className="badge-chip-desc">{badge.description}</span>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
 
   if (summary.won === 0 && dailyStats.played === 0) {
     return (
@@ -38,6 +63,7 @@ export default function Stats() {
               : 'İlk oyununu tamamladığında hamle sayın, süren ve rekorların burada birikmeye başlayacak.'}
           </p>
         </header>
+        {badgeGallery}
         <section className="cta">
           <Link to="/oyna" className="btn-primary btn-lg">
             Oynamaya başla
@@ -70,6 +96,8 @@ export default function Stats() {
           <StatTile value={formatDuration(summary.totalSeconds)} label="toplam süre" />
         </section>
       )}
+
+      {badgeGallery}
 
       {dailyStats.played > 0 && (
         <section className="doc-section">

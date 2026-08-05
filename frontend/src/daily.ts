@@ -19,6 +19,10 @@ export interface DailyResult {
   targetTitle: string
   /** Unix ms */
   at: number
+  /** En kısa çözümle eşleşti mi — solution gecikmeli geldiği için sonradan patchlenir. */
+  optimal?: boolean
+  /** Zincirde en az bir yönetmen bağlantısı kullanıldı mı */
+  usedDirector?: boolean
 }
 
 function read(): DailyResult[] {
@@ -67,6 +71,21 @@ export function clearDaily(): void {
   } catch {
     // yoksay
   }
+}
+
+/** Rozet hesaplaması için tam liste — `.recent` gibi 10 kayıtla sınırlı değil. */
+export function getAllDailyResults(): DailyResult[] {
+  return read().slice()
+}
+
+/** Bir günlük sonucu `date` anahtarından bulup üstüne yazar. Bulunamazsa sessizce vazgeçer. */
+export function patchDailyResult(date: string, patch: Partial<Pick<DailyResult, 'optimal'>>): void {
+  const results = read()
+  const index = results.findIndex((result) => result.date === date)
+  if (index === -1) return
+  const next = results.slice()
+  next[index] = { ...next[index], ...patch }
+  write(next)
 }
 
 /** YYYY-AA-GG tarihini gün cinsinden kaydırır (UTC'de hesaplanır, sapma olmaz). */

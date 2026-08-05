@@ -2248,6 +2248,88 @@
   color: var(--ink-soft);
 }
 
+/* ── Rozet galerisi ── */
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.badge-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 12px;
+  border: var(--bd);
+  border-radius: var(--r-md);
+  background: var(--paper);
+  box-shadow: var(--sh-sm);
+  text-align: center;
+  transition:
+    transform var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease);
+}
+
+.badge-chip--pink {
+  background: var(--pink);
+}
+
+.badge-chip--mint {
+  background: var(--mint);
+}
+
+.badge-chip--yellow {
+  background: var(--yellow);
+}
+
+.badge-chip--lilac {
+  background: var(--lilac);
+}
+
+.badge-chip--pink,
+.badge-chip--mint,
+.badge-chip--yellow,
+.badge-chip--lilac {
+  box-shadow: var(--sh);
+}
+
+.badge-chip--pink:hover,
+.badge-chip--mint:hover,
+.badge-chip--yellow:hover,
+.badge-chip--lilac:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--sh-lg);
+}
+
+.badge-chip.is-locked {
+  background: var(--paper-2);
+  box-shadow: none;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.badge-chip-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.badge-chip-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.badge-chip-desc {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
 /* ── Tablo ── */
 
 .table-wrap {
@@ -2920,6 +3002,26 @@
   font-weight: 700;
   color: var(--ink-soft);
   max-width: 26ch;
+}
+
+/* Kazanma anında yeni açılan rozetlerin kutlaması — durum rozetinden ayırt
+   edilsin diye lilac zeminde, aynı .ticket-eyebrow diliyle. */
+.ticket-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ticket-badge-chip {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink);
+  padding: 5px 11px;
+  border: var(--bd);
+  border-radius: var(--r-pill);
+  background: var(--lilac);
+  box-shadow: var(--sh-sm);
 }
 
 /* CSS'le çizilmiş barkod — asset ya da font glifi yok, her yerde aynı görünür */

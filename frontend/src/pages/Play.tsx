@@ -27,6 +27,7 @@ export default function Play() {
     setDurationSeconds,
     timeLeft,
     solution,
+    newlyUnlockedBadges,
     startNewGame,
     resetToSetup,
     giveUp,
@@ -168,6 +169,7 @@ export default function Play() {
           moves={moves}
           seconds={elapsed}
           solution={solution}
+          newBadges={newlyUnlockedBadges}
           start={game.start}
           target={game.target}
           onClose={() => setTicketOpen(false)}

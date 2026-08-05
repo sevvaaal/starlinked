@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { MediaBrief, SolutionResponse } from '../types'
+import type { Badge } from '../achievements'
 import { formatDuration } from '../stats'
 import MediaCard from './MediaCard'
 
@@ -8,6 +9,8 @@ interface ResultModalProps {
   moves: number
   seconds: number
   solution: SolutionResponse | null
+  /** Bu kazanımda yeni açılan rozetler — sadece kazanma durumunda gösterilir. */
+  newBadges: Badge[]
   start: MediaBrief
   target: MediaBrief
   onClose: () => void
@@ -30,6 +33,7 @@ export default function ResultModal({
   moves,
   seconds,
   solution,
+  newBadges,
   start,
   target,
   onClose,
@@ -116,6 +120,16 @@ export default function ResultModal({
             <p className="ticket-note">
               {beatenByShorter ? `En kısa yol ${solution.hops} hamleymiş.` : '🏅 En kısa yoldan gittin.'}
             </p>
+          )}
+
+          {isWin && newBadges.length > 0 && (
+            <div className="ticket-badges">
+              {newBadges.map((badge) => (
+                <span key={badge.id} className="ticket-badge-chip">
+                  {badge.icon} Yeni rozet: {badge.title}
+                </span>
+              ))}
+            </div>
           )}
 
           <span className="ticket-barcode" aria-hidden="true" />

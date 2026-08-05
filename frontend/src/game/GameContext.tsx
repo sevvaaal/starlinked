@@ -11,8 +11,10 @@ import type {
   SolutionResponse,
 } from '../types'
 import { getActorCredits, getDailyGame, getMediaCast, getNewGame, getSolution } from '../api'
-import { recordStart, recordWin } from '../stats'
-import { recordDailyResult } from '../daily'
+import { patchWin, recordStart, recordWin } from '../stats'
+import { patchDailyResult, recordDailyResult } from '../daily'
+import type { Badge } from '../achievements'
+import { evaluateUnlockedBadges } from '../achievements'
 
 /** Oyuna girince gösterilen kurulum ekranının varsayılanı — istenirse değiştirilir. */
 export const DEFAULT_DURATION_SECONDS = 180
@@ -57,6 +59,8 @@ interface GameContextValue {
   isActive: boolean
   /** Pes edildiğinde ya da kazanıldığında dolan örnek çözüm; alınamadıysa null kalır. */
   solution: SolutionResponse | null
+  /** Son kazanımda yeni açılan rozetler — bilet bunu kutlar. */
+  newlyUnlockedBadges: Badge[]
   /** Süre limitli serbest oyun başlatır. duration null verilirse sınırsız oynanır. */
   startNewGame: (duration?: number | null) => void
   startDailyGame: () => void
@@ -89,6 +93,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [elapsed, setElapsed] = useState(0)
   const [durationSeconds, setDurationSeconds] = useState<number | null>(DEFAULT_DURATION_SECONDS)
   const [solution, setSolution] = useState<SolutionResponse | null>(null)
+  const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<Badge[]>([])
 
   const moves = chain.filter((node) => node.kind === 'actor').length
   const isFinished = status === 'won' || status === 'gave-up' || status === 'timeout'
@@ -142,6 +147,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setMode(nextMode)
         setDaily(null)
         setSolution(null)
+        setNewlyUnlockedBadges([])
         setDurationSeconds(nextMode === 'daily' ? null : duration)
         try {
           const response = await fetchGame()
@@ -179,6 +185,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setElapsed(0)
     setStartedAt(null)
     setSolution(null)
+    setNewlyUnlockedBadges([])
     setStatus('idle')
   }, [])
 
@@ -218,14 +225,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
         endingRef.current = true
         const seconds = startedAt !== null ? Math.floor((Date.now() - startedAt) / 1000) : elapsed
         const finalMoves = nextChain.filter((node) => node.kind === 'actor').length
+        const usedDirector = nextChain.some(
+          (node) => node.kind === 'actor' && node.actor.is_director,
+        )
+        const winAt = Date.now()
         setElapsed(seconds)
         setStatus('won')
+
+        // Kayıttan önceki açık rozetleri al ki kaydettikten sonra "yeni" olanı ayırt edelim.
+        const beforeIds = new Set(evaluateUnlockedBadges().map((badge) => badge.id))
+
         recordWin({
           moves: finalMoves,
           seconds,
           startTitle: game.start.title,
           targetTitle: game.target.title,
-          at: Date.now(),
+          at: winAt,
+          usedDirector,
         })
         if (daily) {
           recordDailyResult({
@@ -236,14 +252,32 @@ export function GameProvider({ children }: { children: ReactNode }) {
             seconds,
             startTitle: daily.start.title,
             targetTitle: daily.target.title,
-            at: Date.now(),
+            at: winAt,
+            usedDirector,
           })
         }
+
+        const afterSync = evaluateUnlockedBadges()
+        setNewlyUnlockedBadges(afterSync.filter((badge) => !beforeIds.has(badge.id)))
+        const knownIds = new Set(afterSync.map((badge) => badge.id))
+
         // En kısa çözümü arka planda getir — kazanma ekranı beklemeden açılır,
-        // karşılaştırma hazır olduğunda kendiliğinden belirir.
+        // karşılaştırma hazır olduğunda kendiliğinden belirir. "En kısa yolu buldun"
+        // rozeti de ancak bu geldikten sonra bilinebildiği için burada değerlendirilir.
         void (async () => {
           try {
-            setSolution(await getSolution(game.start, game.target))
+            const sol = await getSolution(game.start, game.target)
+            setSolution(sol)
+            if (sol && sol.hops === finalMoves) {
+              patchWin(winAt, { optimal: true })
+              if (daily) patchDailyResult(daily.date, { optimal: true })
+              const afterAsync = evaluateUnlockedBadges().filter(
+                (badge) => !knownIds.has(badge.id),
+              )
+              if (afterAsync.length > 0) {
+                setNewlyUnlockedBadges((prev) => [...prev, ...afterAsync])
+              }
+            }
           } catch {
             setSolution(null)
           }
@@ -308,6 +342,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       timeLeft,
       isActive,
       solution,
+      newlyUnlockedBadges,
       startNewGame,
       startDailyGame,
       resetToSetup,
@@ -333,6 +368,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       timeLeft,
       isActive,
       solution,
+      newlyUnlockedBadges,
       startNewGame,
       startDailyGame,
       resetToSetup,

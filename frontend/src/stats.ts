@@ -12,6 +12,10 @@ export interface GameRecord {
   targetTitle: string
   /** Unix ms */
   at: number
+  /** En kısa çözümle eşleşti mi — solution gecikmeli geldiği için sonradan patchlenir. */
+  optimal?: boolean
+  /** Zincirde en az bir yönetmen bağlantısı kullanıldı mı */
+  usedDirector?: boolean
 }
 
 interface StatsData {
@@ -61,6 +65,21 @@ export function clearStats(): void {
   } catch {
     // yoksay
   }
+}
+
+/** Rozet hesaplaması için tam liste — `.recent` gibi 10 kayıtla sınırlı değil. */
+export function getAllWins(): GameRecord[] {
+  return read().wins.slice()
+}
+
+/** Bir kazanımı `at` damgasından bulup üstüne yazar. Bulunamazsa sessizce vazgeçer. */
+export function patchWin(at: number, patch: Partial<Pick<GameRecord, 'optimal'>>): void {
+  const data = read()
+  const index = data.wins.findIndex((win) => win.at === at)
+  if (index === -1) return
+  const wins = data.wins.slice()
+  wins[index] = { ...wins[index], ...patch }
+  write({ ...data, wins })
 }
 
 export interface StatsSummary {
