@@ -40,9 +40,8 @@ export default function Home() {
         <span className="sparkle sparkle--4" aria-hidden="true" />
         <span className="hero-eyebrow">Film & dizi bağlantı oyunu</span>
         <h1>
-          Her film bir <em className="grad-pink">oyuncuyla</em>
-          <br />
-          başka bir <em className="grad-mint">filme</em> bağlanır
+          İki <em className="grad-pink">filmi</em> kaç{' '}
+          <em className="grad-mint">oyuncuyla</em> bağlayabilirsin?
         </h1>
         <p className="hero-sub">
           Başlangıçtan hedefe giden zinciri ortak oyuncuları takip ederek kur. Kaç hamlede
