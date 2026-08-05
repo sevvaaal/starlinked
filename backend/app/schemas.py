@@ -75,3 +75,12 @@ class SolutionResponse(BaseModel):
     start: MediaBrief
     steps: list[SolutionStep]
     hops: int
+
+
+class MCQRoundResponse(BaseModel):
+    """Çoktan seçmeli 'oyunculardan yapımı bul' turu — cevap açıkça gönderilir,
+    tıpkı SolutionResponse gibi; client-side reveal ilerlemesi kontrol eder."""
+
+    options: list[MediaBrief]
+    answer: MediaBrief
+    cast: list[CastMember]

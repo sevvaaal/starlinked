@@ -67,6 +67,13 @@ export interface SolutionResponse {
   hops: number
 }
 
+/** Çoktan seçmeli "oyunculardan yapımı bul" turu */
+export interface MCQRoundResponse {
+  options: MediaBrief[]
+  answer: MediaBrief
+  cast: CastMember[]
+}
+
 export type ChainNode =
   | { kind: 'media'; media: MediaBrief }
   | { kind: 'actor'; actor: CastMember }

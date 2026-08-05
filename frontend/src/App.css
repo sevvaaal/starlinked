@@ -45,6 +45,10 @@
   background: var(--yellow);
 }
 
+.window--lilac .window-bar {
+  background: var(--lilac);
+}
+
 .window-title {
   font-size: 12px;
   font-weight: 900;
@@ -1214,6 +1218,55 @@
   box-shadow: 0 0 0 var(--ink);
 }
 
+/* Oyunculardan Film Bul — yanlış/doğru seçenek işaretleri */
+.pick-card--wrong {
+  opacity: 0.45;
+  pointer-events: none;
+  border-color: var(--danger);
+  box-shadow: var(--sh-sm);
+}
+
+.pick-card--wrong:hover {
+  transform: none;
+  background: var(--paper-2);
+}
+
+.pick-card--correct {
+  border-color: var(--mint-deep);
+  background: var(--mint);
+  box-shadow: var(--sh);
+}
+
+/* Açılan oyuncu fotoğrafları şeridi */
+.reveal-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.reveal-photo {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: var(--bd);
+  box-shadow: var(--sh-sm);
+  background: var(--paper-2);
+}
+
+.reveal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.reveal-photo .pick-card-placeholder {
+  border-radius: 50%;
+}
+
 .pick-card-title {
   font-size: 12px;
   font-weight: 800;
@@ -1728,6 +1781,20 @@
   .steps {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* ── Mini oyunlar hub'ı ── */
+
+.mini-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.mini-game-card {
+  text-decoration: none;
+  color: inherit;
 }
 
 .step-card {

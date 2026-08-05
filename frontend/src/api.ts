@@ -1,6 +1,7 @@
 import type {
   ActorCreditsResponse,
   DailyGameResponse,
+  MCQRoundResponse,
   MediaBrief,
   MediaCastResponse,
   MediaType,
@@ -37,3 +38,5 @@ export const getSolution = (start: MediaBrief, target: MediaBrief) => {
   })
   return request<SolutionResponse>(`/api/solution?${query}`)
 }
+
+export const getMcqRound = () => request<MCQRoundResponse>('/api/mcq-round')

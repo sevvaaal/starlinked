@@ -2,11 +2,12 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 
-from . import daily, lookups, pool_graph, solution, tmdb_client
+from . import daily, lookups, mcq, pool_graph, solution, tmdb_client
 from .config import get_settings
 from .schemas import (
     ActorCreditsResponse,
     DailyGameResponse,
+    MCQRoundResponse,
     MediaBrief,
     MediaCastResponse,
     NewGameResponse,
@@ -75,6 +76,23 @@ async def game_solution(
     if answer is None:
         raise HTTPException(404, "No known chain between these titles")
     return answer
+
+
+@router.get("/mcq-round", response_model=MCQRoundResponse)
+async def mcq_round():
+    """Çoktan seçmeli 'oyunculardan yapımı bul' turu — havuzdan üretilir,
+    /new-game ve /daily gibi belirli bir ID aramaz, o yüzden hata durumunda
+    /solution'ın 404'ü değil onlarınki gibi 502 kullanılır."""
+    settings = get_settings()
+    try:
+        round_ = await mcq.pick_mcq_round(settings)
+    except tmdb_client.TMDbError as exc:
+        raise HTTPException(502, "TMDb request failed") from exc
+
+    if round_ is None:
+        raise HTTPException(502, "Could not build a guess-the-cast round from TMDb data")
+
+    return MCQRoundResponse(options=round_.options, answer=round_.answer, cast=round_.cast)
 
 
 @router.get("/media/{media_type}/{media_id}/cast", response_model=MediaCastResponse)

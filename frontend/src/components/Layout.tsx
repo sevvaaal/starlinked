@@ -6,6 +6,7 @@ import { getDailyResult, puzzleDateNow } from '../daily'
 const NAV_ITEMS = [
   { to: '/gunluk', label: 'Günlük' },
   { to: '/oyna', label: 'Oyna' },
+  { to: '/mini-oyunlar', label: 'Mini Oyunlar' },
   { to: '/nasil-oynanir', label: 'Kurallar' },
   { to: '/istatistikler', label: 'Skorlar' },
 ]
