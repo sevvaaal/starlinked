@@ -149,6 +149,21 @@ async def get_media_cast(media_type: MediaType, media_id: int) -> MediaCastRespo
     return response
 
 
+async def get_link_cast(media_type: MediaType, media_id: int) -> list[tuple[int, float | None]]:
+    """The main cast as (person_id, popularity), in billing order — what the pool
+    graph links titles on. Not cached: the graph built from it is.
+
+    Kept separate from `get_media_cast` on purpose. Building a graph touches
+    hundreds of titles, and caching each full cast (series carry hundreds of
+    searchable extra players) is what pushed the server past its memory limit.
+    """
+    if media_type == "movie":
+        members, _ = _movie_cast(await tmdb_client.get_movie_credits(media_id))
+    else:
+        members, _ = _tv_cast(await tmdb_client.get_tv_aggregate_credits(media_id))
+    return [(member.person_id, member.popularity) for member in members]
+
+
 async def get_actor_credits(person_id: int) -> ActorCreditsResponse:
     """A person's deduped movie+tv credits (combined_credits). Cached. Raises TMDbError."""
     cache_key = f"credits:{person_id}"

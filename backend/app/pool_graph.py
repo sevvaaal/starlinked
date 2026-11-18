@@ -22,7 +22,9 @@ from .levels import DEFAULT_LEVEL, LevelName, get_level
 
 MediaKey = tuple[str, int]
 
-MAX_CONCURRENT_REQUESTS = 15
+# Kept low on purpose: each in-flight request holds a parsed credits payload,
+# and long-running series' payloads are large. Peak memory scales with this.
+MAX_CONCURRENT_REQUESTS = 6
 
 # A target this many "shared actor" hops away from the start: far enough to be
 # a puzzle, close enough to stay winnable.
@@ -136,7 +138,7 @@ class PoolGraph:
 async def _fetch_cast(key: MediaKey):
     media_type, media_id = key
     async with _semaphore:
-        return key, await lookups.get_media_cast(media_type, media_id)
+        return key, await lookups.get_link_cast(media_type, media_id)
 
 
 async def _build_graph(settings: Settings, level: LevelName) -> PoolGraph:
@@ -153,12 +155,12 @@ async def _build_graph(settings: Settings, level: LevelName) -> PoolGraph:
     for result in results:
         if isinstance(result, BaseException):
             continue  # one unavailable title shouldn't sink the whole graph
-        key, cast_response = result
+        key, link_cast = result
         # Only cast members this level accepts as links join two titles in the graph.
         actor_ids = {
-            member.person_id
-            for position, member in enumerate(cast_response.cast)
-            if definition.links_through(position, member)
+            person_id
+            for position, (person_id, popularity) in enumerate(link_cast)
+            if definition.links_through(position, popularity)
         }
         media_to_actors[key] = actor_ids
         for actor_id in actor_ids:

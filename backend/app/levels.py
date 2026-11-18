@@ -16,8 +16,6 @@ import random
 from dataclasses import dataclass
 from typing import Literal
 
-from .schemas import CastMember
-
 LevelName = Literal["casual", "buff", "cinephile"]
 LEVEL_NAMES: tuple[LevelName, ...] = ("casual", "buff", "cinephile")
 DEFAULT_LEVEL: LevelName = "buff"
@@ -45,13 +43,13 @@ class Level:
     # Casual only: no animated titles at all — voice casts aren't "everyone knows them".
     skip_animation: bool = False
 
-    def links_through(self, position: int, member: CastMember) -> bool:
-        """Whether this cast member (at `position` in billing order) can join two titles."""
+    def links_through(self, position: int, popularity: float | None) -> bool:
+        """Whether a cast member (at `position` in billing order) can join two titles."""
         if self.top_billed is None:
             return True
         if position < self.top_billed:
             return True
-        return (member.popularity or 0) >= (self.famous_popularity or float("inf"))
+        return (popularity or 0) >= (self.famous_popularity or float("inf"))
 
 
 def _buff_queries(vote_count_gte: int, pages: int) -> tuple[Discover, ...]:
