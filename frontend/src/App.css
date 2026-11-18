@@ -109,6 +109,13 @@
   flex-direction: column;
 }
 
+/* Positioned (but with no z-index) so the page paints above the starfield,
+   which comes first in the layout */
+.stage,
+.footer {
+  position: relative;
+}
+
 .stage {
   flex: 1;
   width: 100%;
