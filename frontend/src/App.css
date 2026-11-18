@@ -3450,3 +3450,79 @@
 .mini-game-icon .badge-icon {
   font-size: 22px;
 }
+
+/* ==========================================================================
+   Phone fixes: start/target cards and the result ticket
+   ========================================================================== */
+
+/* Long titles shouldn't push a card wider than its column */
+.media-card-title {
+  overflow-wrap: anywhere;
+}
+
+/* Pop-ups taller than the screen (the stacked ticket on phones) used to be cut
+   off at the top, because a centered flex child can't be scrolled to. margin:
+   auto centers when it fits and lets the backdrop scroll when it doesn't. */
+.modal-backdrop {
+  align-items: flex-start;
+}
+
+.modal-backdrop > .ticket,
+.modal-backdrop > .modal {
+  margin: auto;
+}
+
+@media (max-width: 560px) {
+  /* Start and target share the row: let the cards shrink instead of overflowing */
+  .matchup {
+    gap: 8px;
+    padding: 18px 10px;
+  }
+
+  .matchup > .media-card,
+  .matchup > .media-card-trigger {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 132px;
+  }
+
+  .matchup .media-card--lg {
+    width: 100%;
+  }
+
+  .matchup-link {
+    padding-top: 0;
+  }
+
+  .matchup-count {
+    font-size: 11px;
+  }
+
+  /* Result ticket: a little more room on the sides, and shrinkable posters */
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .ticket {
+    max-width: 360px;
+  }
+
+  .ticket-posters {
+    gap: 8px;
+    padding: 18px 12px 12px;
+  }
+
+  .ticket-posters > .media-card {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 120px;
+  }
+
+  .ticket-posters .media-card--lg {
+    width: 100%;
+  }
+
+  .ticket-stub {
+    padding: 14px 16px 18px;
+  }
+}
