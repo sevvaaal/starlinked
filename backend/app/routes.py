@@ -80,9 +80,9 @@ async def game_solution(
 
 @router.get("/mcq-round", response_model=MCQRoundResponse)
 async def mcq_round():
-    """Çoktan seçmeli 'oyunculardan yapımı bul' turu — havuzdan üretilir,
-    /new-game ve /daily gibi belirli bir ID aramaz, o yüzden hata durumunda
-    /solution'ın 404'ü değil onlarınki gibi 502 kullanılır."""
+    """Multiple-choice 'guess the title from the cast' round — generated from the
+    pool. Like /new-game and /daily it doesn't look up a specific ID, so on
+    failure it returns 502 like they do, not /solution's 404."""
     settings = get_settings()
     try:
         round_ = await mcq.pick_mcq_round(settings)

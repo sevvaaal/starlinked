@@ -9,7 +9,7 @@ interface ResultModalProps {
   moves: number
   seconds: number
   solution: SolutionResponse | null
-  /** Bu kazanımda yeni açılan rozetler — sadece kazanma durumunda gösterilir. */
+  /** Badges newly unlocked by this win — shown only when the player wins. */
   newBadges: Badge[]
   start: MediaBrief
   target: MediaBrief
@@ -22,12 +22,12 @@ function buildShareText(status: ResultModalProps['status'], moves: number, secon
   const rail = `🎬${'🔗'.repeat(Math.min(moves, 12))}${outcomeEmoji}`
   const line =
     status === 'won'
-      ? `${moves} hamlede bağladım · ⏱ ${formatDuration(seconds)}`
-      : `${moves} hamle sonra ${status === 'timeout' ? 'süre doldu' : 'pes ettim'}`
-  return ['dizilink', rail, line, window.location.origin].join('\n')
+      ? `Connected in ${moves} ${moves === 1 ? 'move' : 'moves'} · ⏱ ${formatDuration(seconds)}`
+      : `${status === 'timeout' ? 'Ran out of time' : 'Gave up'} after ${moves} ${moves === 1 ? 'move' : 'moves'}`
+  return ['starlinked', rail, line, window.location.origin].join('\n')
 }
 
-/** Wordle tarzı sonuç bileti — oyun bitince açılan, kapatılabilen bir pop-up. */
+/** Wordle-style result ticket — a dismissible pop-up shown when the game ends. */
 export default function ResultModal({
   status,
   moves,
@@ -64,9 +64,9 @@ export default function ResultModal({
         return
       }
       await navigator.clipboard.writeText(text)
-      setShareNote('Panoya kopyalandı')
+      setShareNote('Copied to clipboard')
     } catch {
-      setShareNote('Paylaşılamadı — metni elle kopyalayabilirsin')
+      setShareNote('Couldn\'t share — you can copy the text manually')
     }
   }
 
@@ -76,41 +76,41 @@ export default function ResultModal({
         className="ticket"
         role="dialog"
         aria-modal="true"
-        aria-label="Oyun sonucu"
+        aria-label="Game result"
         onClick={(event) => event.stopPropagation()}
       >
-        <button className="ticket-close" onClick={onClose} aria-label="Kapat">
+        <button className="ticket-close" onClick={onClose} aria-label="Close">
           ✕
         </button>
 
         <div className="ticket-posters">
-          <MediaCard media={start} label="Başlangıç" tone="pink" size="lg" />
+          <MediaCard media={start} label="Start" tone="pink" size="lg" />
           <span className="ticket-posters-link" aria-hidden="true">
             →
           </span>
-          <MediaCard media={target} label="Hedef" tone="mint" size="lg" />
+          <MediaCard media={target} label="Target" tone="mint" size="lg" />
         </div>
 
         <div className="ticket-divider" role="separator" aria-hidden="true" />
 
         <div className="ticket-stub">
           <span className={`ticket-eyebrow${isWin ? '' : ' ticket-eyebrow--muted'}`}>
-            {isWin ? 'Bağlandı' : status === 'timeout' ? 'Süre doldu' : 'Pes ettin'}
+            {isWin ? 'Connected' : status === 'timeout' ? 'Time\'s up' : 'You gave up'}
           </span>
-          <h2 className="ticket-title">{isWin ? 'Hedefe ulaştın' : 'Bu sefer olmadı'}</h2>
+          <h2 className="ticket-title">{isWin ? 'You reached the target' : 'Not this time'}</h2>
 
           <dl className="ticket-info">
             <div className="ticket-info-row">
-              <dt>Hamle</dt>
+              <dt>Moves</dt>
               <dd>{moves}</dd>
             </div>
             <div className="ticket-info-row">
-              <dt>Süre</dt>
+              <dt>Time</dt>
               <dd>{formatDuration(seconds)}</dd>
             </div>
             {solution && (
               <div className="ticket-info-row">
-                <dt>En kısa</dt>
+                <dt>Shortest</dt>
                 <dd>{solution.hops}</dd>
               </div>
             )}
@@ -118,7 +118,7 @@ export default function ResultModal({
 
           {isWin && solution && (
             <p className="ticket-note">
-              {beatenByShorter ? `En kısa yol ${solution.hops} hamleymiş.` : '🏅 En kısa yoldan gittin.'}
+              {beatenByShorter ? `The shortest path was ${solution.hops} ${solution.hops === 1 ? 'move' : 'moves'}.` : '🏅 You took the shortest path.'}
             </p>
           )}
 
@@ -126,7 +126,7 @@ export default function ResultModal({
             <div className="ticket-badges">
               {newBadges.map((badge) => (
                 <span key={badge.id} className="ticket-badge-chip">
-                  {badge.icon} Yeni rozet: {badge.title}
+                  {badge.icon} New badge: {badge.title}
                 </span>
               ))}
             </div>
@@ -136,10 +136,10 @@ export default function ResultModal({
 
           <div className="ticket-actions">
             <button className="btn-ghost" onClick={() => void handleShare()}>
-              Paylaş
+              Share
             </button>
             <button className="btn-primary" onClick={onPlayAgain}>
-              Tekrar oyna
+              Play again
             </button>
           </div>
           {shareNote && (

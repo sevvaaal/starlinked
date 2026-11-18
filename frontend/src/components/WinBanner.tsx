@@ -6,16 +6,16 @@ interface WinBannerProps {
   chain: ChainNode[]
   moves: number
   seconds: number
-  /** Arka planda getirilir; henüz gelmediyse null. */
+  /** Fetched in the background; null until it arrives. */
   solution: SolutionResponse | null
   onPlayAgain: () => void
 }
 
 function rating(moves: number): string {
-  if (moves <= 2) return 'Efsane'
-  if (moves <= 4) return 'Çok iyi'
-  if (moves <= 6) return 'İyi iş'
-  return 'Tamamlandı'
+  if (moves <= 2) return 'Legendary'
+  if (moves <= 4) return 'Great'
+  if (moves <= 6) return 'Nice work'
+  return 'Completed'
 }
 
 export default function WinBanner({ chain, moves, seconds, solution, onPlayAgain }: WinBannerProps) {
@@ -27,48 +27,48 @@ export default function WinBanner({ chain, moves, seconds, solution, onPlayAgain
     <section className="win">
       <div className="win-card">
         <span className="win-rating">{rating(moves)}</span>
-        <h2 className="win-title">Hedefe ulaştın</h2>
+        <h2 className="win-title">You reached the target</h2>
 
         <div className="win-stats">
           <div className="win-stat">
             <span className="win-stat-value">{moves}</span>
-            <span className="win-stat-label">hamle</span>
+            <span className="win-stat-label">moves</span>
           </div>
           <span className="win-stat-sep" aria-hidden="true" />
           <div className="win-stat">
             <span className="win-stat-value">
               {minutes}
-              <small>dk</small> {rest}
-              <small>sn</small>
+              <small>m</small> {rest}
+              <small>s</small>
             </span>
-            <span className="win-stat-label">süre</span>
+            <span className="win-stat-label">time</span>
           </div>
         </div>
 
         {solution &&
           (beatenByShorter ? (
             <p className="win-optimal-note">
-              En kısa yol <strong>{solution.hops} hamle</strong>ymiş — aşağıda görebilirsin.
+              The shortest path was <strong>{solution.hops} moves</strong> — see it below.
             </p>
           ) : (
             <p className="win-optimal-note win-optimal-note--best">
-              🏅 En kısa yoldan gittin, bundan daha iyisi yok.
+              🏅 You took the shortest path — it doesn't get better than that.
             </p>
           ))}
 
         <button className="btn-primary btn-lg" onClick={onPlayAgain}>
-          Tekrar oyna
+          Play again
         </button>
       </div>
 
       <div className="win-chain">
-        <h3 className="win-chain-title">Kurduğun zincir</h3>
+        <h3 className="win-chain-title">Your chain</h3>
         <ChainDisplay chain={chain} />
       </div>
 
       {beatenByShorter && solution && (
         <div className="win-chain">
-          <h3 className="win-chain-title">En kısa çözüm — {solution.hops} hamle</h3>
+          <h3 className="win-chain-title">Shortest solution — {solution.hops} moves</h3>
           <ChainDisplay chain={solutionToChain(solution)} showCurrent={false} />
         </div>
       )}

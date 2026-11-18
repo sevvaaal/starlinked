@@ -16,7 +16,7 @@ import { patchDailyResult, recordDailyResult } from '../daily'
 import type { Badge } from '../achievements'
 import { evaluateUnlockedBadges } from '../achievements'
 
-/** Oyuna girince gösterilen kurulum ekranının varsayılanı — istenirse değiştirilir. */
+/** Default for the setup screen shown when entering the game — can be changed. */
 export const DEFAULT_DURATION_SECONDS = 180
 
 function creditToMediaBrief(credit: CreditItem): MediaBrief {
@@ -29,16 +29,16 @@ function creditToMediaBrief(credit: CreditItem): MediaBrief {
 }
 
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : 'Beklenmeyen bir hata oluştu'
+  return err instanceof Error ? err.message : 'An unexpected error occurred'
 }
 
-/** 'free' = sınırsız rastgele oyun, 'daily' = günün bulmacası */
+/** 'free' = unlimited random games, 'daily' = the daily puzzle */
 export type GameMode = 'free' | 'daily'
 
 interface GameContextValue {
   game: NewGameResponse | null
   mode: GameMode
-  /** Sadece günlük modda dolu: numara, par, tarih */
+  /** Only set in daily mode: number, par, date */
   daily: DailyGameResponse | null
   chain: ChainNode[]
   currentMedia: MediaBrief | null
@@ -50,21 +50,21 @@ interface GameContextValue {
   error: string | null
   moves: number
   elapsed: number
-  /** Serbest oyunda seçilen süre sınırı; null ise sınırsız. */
+  /** Time limit chosen for free play; null means unlimited. */
   durationSeconds: number | null
-  /** Kurulum ekranında süre seçimini günceller — oyunu başlatmaz. */
+  /** Updates the time-limit choice on the setup screen — doesn't start the game. */
   setDurationSeconds: (value: number | null) => void
-  /** Kalan süre — durationSeconds null ise null. */
+  /** Time left — null when durationSeconds is null. */
   timeLeft: number | null
   isActive: boolean
-  /** Pes edildiğinde ya da kazanıldığında dolan örnek çözüm; alınamadıysa null kalır. */
+  /** Example solution filled in on give-up or win; stays null if it couldn't be fetched. */
   solution: SolutionResponse | null
-  /** Son kazanımda yeni açılan rozetler — bilet bunu kutlar. */
+  /** Badges newly unlocked by the last win — the ticket celebrates these. */
   newlyUnlockedBadges: Badge[]
-  /** Süre limitli serbest oyun başlatır. duration null verilirse sınırsız oynanır. */
+  /** Starts a timed free-play game. Pass a null duration to play without a limit. */
   startNewGame: (duration?: number | null) => void
   startDailyGame: () => void
-  /** Devam eden oyunu bırakıp kurulum ekranına döner — süreyi değiştirmek için. */
+  /** Abandons the current game and returns to the setup screen — to change the time limit. */
   resetToSetup: () => void
   selectActor: (actor: CastMember) => void
   selectMedia: (credit: CreditItem) => void
@@ -74,8 +74,8 @@ interface GameContextValue {
 const GameContext = createContext<GameContextValue | null>(null)
 
 /**
- * Oyun state'i router'ın üstünde durur: kullanıcı kurallara ya da
- * istatistiklere gidip geri döndüğünde yarım kalan oyun kaybolmaz.
+ * Game state lives above the router: if the user visits the rules or
+ * stats and comes back, the unfinished game isn't lost.
  */
 export function GameProvider({ children }: { children: ReactNode }) {
   const [game, setGame] = useState<NewGameResponse | null>(null)
@@ -97,12 +97,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const moves = chain.filter((node) => node.kind === 'actor').length
   const isFinished = status === 'won' || status === 'gave-up' || status === 'timeout'
-  // Menüdeki "devam eden oyun" noktası serbest oyuna işaret eder; günlüğün
-  // kendi rozeti var.
+  // The "game in progress" dot in the menu refers to free play; the daily
+  // has its own marker.
   const isActive = game !== null && !isFinished && mode === 'free'
   const timeLeft = durationSeconds !== null ? Math.max(durationSeconds - elapsed, 0) : null
 
-  // Oyun bitirme/başlatma sırasında yarışan zamanlayıcı tetiklemelerini önler.
+  // Prevents racing timer triggers while a game is ending/starting.
   const endingRef = useRef(false)
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id)
   }, [startedAt, status, isFinished])
 
-  // Zincirin güncel halini callback'lere kapatmadan okumak için
+  // To read the latest chain without closing over it in callbacks
   const chainRef = useRef(chain)
   chainRef.current = chain
   const gameRef = useRef(game)
@@ -132,7 +132,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  /** İki mod da aynı akışı kullanır, tek fark eşleşmenin nereden geldiği. */
+  /** Both modes share the same flow; the only difference is where the matchup comes from. */
   const startGame = useCallback(
     (fetchGame: () => Promise<NewGameResponse>, nextMode: GameMode, duration: number | null) => {
       void (async () => {
@@ -173,7 +173,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   )
   const startDailyGame = useCallback(() => startGame(getDailyGame, 'daily', null), [startGame])
 
-  /** Kurulumu değiştirmek için: oyunu bırakır, /oyna kurulum ekranına döner. */
+  /** To change the setup: abandons the game and returns to the /play setup screen. */
   const resetToSetup = useCallback(() => {
     endingRef.current = false
     setGame(null)
@@ -195,8 +195,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       try {
         const response = await getActorCredits(actor.person_id, actor.is_director ? 'director' : 'cast')
         setSelectedActor(actor)
-        // Daha önce uğranmış bir yapım listeden çıkarılmıyor artık — oyuncu
-        // isterse zinciri aynı filme geri döndürebilir.
+        // Titles already visited are no longer removed from the list — the player
+        // can bring the chain back to the same title if they want.
         setCredits(response.credits)
         setStatus('picking-media')
       } catch (err) {
@@ -232,7 +232,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setElapsed(seconds)
         setStatus('won')
 
-        // Kayıttan önceki açık rozetleri al ki kaydettikten sonra "yeni" olanı ayırt edelim.
+        // Grab the badges unlocked before saving so we can tell which ones are "new" afterwards.
         const beforeIds = new Set(evaluateUnlockedBadges().map((badge) => badge.id))
 
         recordWin({
@@ -261,9 +261,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setNewlyUnlockedBadges(afterSync.filter((badge) => !beforeIds.has(badge.id)))
         const knownIds = new Set(afterSync.map((badge) => badge.id))
 
-        // En kısa çözümü arka planda getir — kazanma ekranı beklemeden açılır,
-        // karşılaştırma hazır olduğunda kendiliğinden belirir. "En kısa yolu buldun"
-        // rozeti de ancak bu geldikten sonra bilinebildiği için burada değerlendirilir.
+        // Fetch the shortest solution in the background — the win screen opens without
+        // waiting, and the comparison appears once it's ready. The "Shortest Path" badge
+        // can only be known after this arrives, so it's evaluated here.
         void (async () => {
           try {
             const sol = await getSolution(game.start, game.target)
@@ -290,9 +290,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   )
 
   /**
-   * Oyunu bir çözümle kapatır — pes edildiğinde ya da süre dolduğunda kullanılır.
-   * Çözüm alınamasa bile oyun kapanır: cevabı gösterememek, oyuncuyu oyunda
-   * kilitli bırakmaktan iyidir.
+   * Ends the game with a solution — used on give-up or when time runs out.
+   * The game ends even if the solution can't be fetched: not showing the answer
+   * is better than leaving the player stuck in the game.
    */
   const finishWithSolution = useCallback(
     async (nextStatus: 'gave-up' | 'timeout') => {
@@ -314,7 +314,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     void finishWithSolution('gave-up')
   }, [finishWithSolution])
 
-  // Süre sınırı dolunca oyunu otomatik bitirir.
+  // Ends the game automatically when the time limit runs out.
   useEffect(() => {
     if (durationSeconds === null || isFinished || status === 'idle' || endingRef.current) return
     if (elapsed >= durationSeconds) {
@@ -383,6 +383,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
 export function useGame(): GameContextValue {
   const context = useContext(GameContext)
-  if (!context) throw new Error('useGame, GameProvider içinde kullanılmalı')
+  if (!context) throw new Error('useGame must be used inside GameProvider')
   return context
 }

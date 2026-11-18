@@ -6,20 +6,20 @@ import { getDailyResult, getDailyStats, puzzleDateNow } from '../daily'
 const STEPS = [
   {
     n: '01',
-    title: 'İki yapım al',
-    body: 'Sana rastgele bir başlangıç ve bir hedef film/dizi veriyoruz. Aralarında görünürde hiçbir bağ yok.',
+    title: 'Get two titles',
+    body: 'We give you a random starting and target movie or show. At first glance they have nothing in common.',
     tone: 'pink',
   },
   {
     n: '02',
-    title: 'Bir oyuncu seç',
-    body: 'Elindeki yapımın kadrosundan birini seç. O oyuncu seni yeni yapımlara açacak kapıdır.',
+    title: 'Pick an actor',
+    body: 'Choose someone from the cast of your current title. That actor is your door to new titles.',
     tone: 'mix',
   },
   {
     n: '03',
-    title: 'Hedefe ulaş',
-    body: 'Oyuncunun oynadığı başka bir yapıma atla ve tekrarla. En az hamleyle hedefe var.',
+    title: 'Reach the target',
+    body: 'Jump to another title that actor was in, and repeat. Reach the target in as few moves as possible.',
     tone: 'mint',
   },
 ] as const
@@ -38,40 +38,40 @@ export default function Home() {
         <span className="sparkle sparkle--2" aria-hidden="true" />
         <span className="sparkle sparkle--3" aria-hidden="true" />
         <span className="sparkle sparkle--4" aria-hidden="true" />
-        <span className="hero-eyebrow">Film & dizi bağlantı oyunu</span>
+        <span className="hero-eyebrow">Movie & TV connection game</span>
         <h1>
-          İki <em className="grad-pink">filmi</em> kaç{' '}
-          <em className="grad-mint">oyuncuyla</em> bağlayabilirsin?
+          How many <em className="grad-mint">actors</em> does it take to link two{' '}
+          <em className="grad-pink">movies</em>?
         </h1>
         <p className="hero-sub">
-          Başlangıçtan hedefe giden zinciri ortak oyuncuları takip ederek kur. Kaç hamlede
-          varabileceğini gör.
+          Build a chain from start to target by following shared cast members. See how few moves
+          it takes.
         </p>
 
         <div className="hero-actions">
-          <Link to="/gunluk" className="btn-primary btn-lg">
-            Günün bulmacası
+          <Link to="/daily" className="btn-primary btn-lg">
+            Daily puzzle
           </Link>
-          <Link to="/oyna" className="btn-ghost btn-lg-ghost">
-            {isActive ? 'Oyuna devam et' : 'Serbest oyna'}
+          <Link to="/play" className="btn-ghost btn-lg-ghost">
+            {isActive ? 'Continue game' : 'Free play'}
           </Link>
         </div>
 
         {isActive ? (
           <p className="hero-resume">
-            Yarım kalmış bir oyunun var — <strong>{moves} hamle</strong> yapmışsın.
+            You have a game in progress — <strong>{moves} {moves === 1 ? 'move' : 'moves'}</strong> so far.
           </p>
         ) : (
           <p className="hero-resume">
-            İlk kez mi geldin? <Link to="/nasil-oynanir" className="text-link">Nasıl oynanır?</Link>
+            First time here? <Link to="/how-to-play" className="text-link">How to play</Link>
           </p>
         )}
       </section>
 
-      {/* Günlük şeridi: herkesin aynı eşleşmeyi oynadığı tek günlük bulmaca */}
+      {/* Daily strip: the one daily puzzle where everyone plays the same matchup */}
       <section className="daily-strip window window--yellow">
         <div className="window-bar">
-          <span className="window-title">GÜNÜN BULMACASI</span>
+          <span className="window-title">DAILY PUZZLE</span>
           <span className="window-dots" aria-hidden="true">
             <span />
             <span />
@@ -82,12 +82,12 @@ export default function Home() {
         <div className="window-body daily-strip-body">
           <div className="daily-strip-main">
             <h2 className="daily-strip-heading">
-              {dailyDone ? 'Bugünü çözdün' : 'Bugünün eşleşmesi hazır'}
+              {dailyDone ? 'You solved today\'s puzzle' : 'Today\'s matchup is ready'}
             </h2>
             <p>
               {dailyDone
-                ? `Zinciri ${dailyDone.moves} hamlede kurdun. Yarın yeni bir eşleşme geliyor.`
-                : 'Herkes aynı başlangıç ve hedefi oynuyor. Günde bir hakkın var — sonucunu paylaşabilirsin.'}
+                ? `You built the chain in ${dailyDone.moves} ${dailyDone.moves === 1 ? 'move' : 'moves'}. A new matchup arrives tomorrow.`
+                : 'Everyone plays the same start and target. You get one try a day — and you can share your result.'}
             </p>
           </div>
 
@@ -95,18 +95,18 @@ export default function Home() {
             {dailyStats.currentStreak > 0 && (
               <div className="mini-stat">
                 <span className="mini-stat-value">{dailyStats.currentStreak}</span>
-                <span className="mini-stat-label">günlük seri</span>
+                <span className="mini-stat-label">day streak</span>
               </div>
             )}
-            <Link to="/gunluk" className="btn-primary">
-              {dailyDone ? 'Sonucu gör' : 'Günlüğü oyna'}
+            <Link to="/daily" className="btn-primary">
+              {dailyDone ? 'See result' : 'Play the daily'}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Örnek zincir: oyunun fikrini tek bakışta anlatır */}
-      <section className="demo" aria-label="Örnek zincir">
+      {/* Example chain: explains the idea of the game at a glance */}
+      <section className="demo" aria-label="Example chain">
         <div className="demo-rail">
           <span className="demo-node demo-node--start">Inception</span>
           <span className="demo-link" aria-hidden="true" />
@@ -118,10 +118,10 @@ export default function Home() {
           <span className="demo-link" aria-hidden="true" />
           <span className="demo-node demo-node--end">The Reader</span>
         </div>
-        <p className="demo-caption">İki hamlelik bir zincir işte böyle görünür.</p>
+        <p className="demo-caption">This is what a two-move chain looks like.</p>
       </section>
 
-      <section className="steps" aria-label="Nasıl çalışır">
+      <section className="steps" aria-label="How it works">
         {STEPS.map((step) => (
           <article className={`step-card step-card--${step.tone}`} key={step.n}>
             <span className="step-num">{step.n}</span>
@@ -133,32 +133,32 @@ export default function Home() {
 
       {summary.won > 0 && (
         <section className="home-stats">
-          <h2 className="section-title">Şu ana kadar</h2>
+          <h2 className="section-title">So far</h2>
           <div className="home-stats-row">
             <div className="mini-stat">
               <span className="mini-stat-value">{summary.won}</span>
-              <span className="mini-stat-label">tamamlanan oyun</span>
+              <span className="mini-stat-label">games completed</span>
             </div>
             <div className="mini-stat">
               <span className="mini-stat-value">{summary.bestMoves}</span>
-              <span className="mini-stat-label">en iyi hamle</span>
+              <span className="mini-stat-label">best moves</span>
             </div>
             <div className="mini-stat">
               <span className="mini-stat-value">{summary.averageMoves}</span>
-              <span className="mini-stat-label">ortalama hamle</span>
+              <span className="mini-stat-label">average moves</span>
             </div>
           </div>
-          <Link to="/istatistikler" className="text-link">
-            Tüm istatistikleri gör →
+          <Link to="/stats" className="text-link">
+            See all stats →
           </Link>
         </section>
       )}
 
       <section className="cta">
-        <h2 className="cta-title">Hazır mısın?</h2>
-        <p className="cta-sub">Her oyun yeni bir eşleşme. Aynısı iki kez gelmez.</p>
-        <Link to="/oyna" className="btn-primary btn-lg">
-          {isActive ? 'Oyuna devam et' : 'Oynamaya başla'}
+        <h2 className="cta-title">Ready?</h2>
+        <p className="cta-sub">Every game is a new matchup. You'll never get the same one twice.</p>
+        <Link to="/play" className="btn-primary btn-lg">
+          {isActive ? 'Continue game' : 'Start playing'}
         </Link>
       </section>
     </div>

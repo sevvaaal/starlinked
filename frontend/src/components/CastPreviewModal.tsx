@@ -8,7 +8,7 @@ interface CastPreviewModalProps {
   onClose: () => void
 }
 
-/** Bir yapımın kadrosuna göz atma penceresi — sadece bilgi amaçlı, seçim yapmaz. */
+/** A window for peeking at a title's cast — informational only, it doesn't make a pick. */
 export default function CastPreviewModal({ media, onClose }: CastPreviewModalProps) {
   const [cast, setCast] = useState<CastMember[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +22,7 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
         if (!cancelled) setCast(response.cast)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Kadro alınamadı')
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not load the cast')
       })
     return () => {
       cancelled = true
@@ -48,12 +48,12 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
         className="modal window window--mint"
         role="dialog"
         aria-modal="true"
-        aria-label={`${media.title} kadrosu`}
+        aria-label={`Cast of ${media.title}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="window-bar">
-          <span className="window-title">KADRO_ÖNİZLEME</span>
-          <button className="modal-close" onClick={onClose} aria-label="Kapat">
+          <span className="window-title">CAST_PREVIEW</span>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
@@ -69,7 +69,7 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
                 </div>
               )}
               <span className={`type-badge type-badge--${media.media_type}`}>
-                {media.media_type === 'movie' ? 'Film' : 'Dizi'}
+                {media.media_type === 'movie' ? 'Movie' : 'TV'}
               </span>
             </div>
             <h3 className="modal-head-title">{media.title}</h3>
@@ -86,11 +86,11 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
                   <div className="skeleton skeleton-line" style={{ width: '55%', height: '9px' }} />
                 </div>
               ))}
-              <span className="sr-only">Kadro yükleniyor</span>
+              <span className="sr-only">Loading cast</span>
             </div>
           )}
 
-          {cast && cast.length === 0 && <p className="modal-error">Bu yapım için kadro bilgisi yok.</p>}
+          {cast && cast.length === 0 && <p className="modal-error">No cast information for this title.</p>}
 
           {cast && cast.length > 0 && (
             <div className="card-grid">
@@ -114,7 +114,7 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
 
           <div className="modal-actions">
             <button className="btn-ghost" onClick={onClose}>
-              Kapat
+              Close
             </button>
           </div>
         </div>

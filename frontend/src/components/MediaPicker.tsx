@@ -13,9 +13,9 @@ interface MediaPickerProps {
 type SortMode = 'rating' | 'newest' | 'oldest'
 
 const SORT_OPTIONS: { value: SortMode; label: string }[] = [
-  { value: 'rating', label: 'Puana göre' },
-  { value: 'newest', label: 'En yeni' },
-  { value: 'oldest', label: 'En eski' },
+  { value: 'rating', label: 'Top rated' },
+  { value: 'newest', label: 'Newest' },
+  { value: 'oldest', label: 'Oldest' },
 ]
 
 function sortCredits(list: CreditItem[], mode: SortMode): CreditItem[] {
@@ -38,7 +38,7 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
     () =>
       sortCredits(
         credits.filter((credit) =>
-          credit.title.toLocaleLowerCase('tr').includes(query.toLocaleLowerCase('tr')),
+          credit.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
         ),
         sortMode,
       ),
@@ -48,7 +48,7 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
   return (
     <section className="picker window--mint">
       <div className="window-bar">
-        <span className="window-title">ADIM_2 — YAPIM_SEC</span>
+        <span className="window-title">STEP_2 — PICK_TITLE</span>
         <span className="window-dots" aria-hidden="true">
           <span />
           <span />
@@ -58,10 +58,11 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
 
       <div className="picker-body">
         <div className="picker-head">
-          <span className="step-badge step-badge--mint">Adım 2</span>
+          <span className="step-badge step-badge--mint">Step 2</span>
           <h2>
-            <span className="picker-subject picker-subject--mint">{actorName}</span>{' '}
-            {isDirector ? 'başka hangi yapımı yönetti?' : 'başka hangi yapımda oynadı?'}
+            {isDirector ? 'What else did ' : 'What else was '}
+            <span className="picker-subject picker-subject--mint">{actorName}</span>
+            {isDirector ? ' direct?' : ' in?'}
           </h2>
         </div>
 
@@ -71,15 +72,15 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
           </span>
           <input
             type="search"
-            placeholder="Film / dizi ara…"
+            placeholder="Search movies / TV…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            aria-label="Film veya dizi ara"
+            aria-label="Search movies or TV shows"
           />
           {query && <span className="search-count">{filtered.length}</span>}
         </div>
 
-        <div className="sort-row" role="group" aria-label="Sıralama">
+        <div className="sort-row" role="group" aria-label="Sort">
           {SORT_OPTIONS.map((option) => (
             <button
               key={option.value}
@@ -97,7 +98,7 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
           <EmptyState
             hasQuery={query.length > 0}
             onClear={() => setQuery('')}
-            emptyText="Bu oyuncunun başka bir yapımı bulunamadı."
+            emptyText="No other titles found for this person."
           />
         ) : (
           <div className="card-grid">
@@ -116,7 +117,7 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
                     </div>
                   )}
                   <span className={`type-badge type-badge--${credit.media_type}`}>
-                    {credit.media_type === 'movie' ? 'Film' : 'Dizi'}
+                    {credit.media_type === 'movie' ? 'Movie' : 'TV'}
                   </span>
                   {credit.vote_average != null && credit.vote_average > 0 && (
                     <span className="rating-badge">★ {credit.vote_average.toFixed(1)}</span>

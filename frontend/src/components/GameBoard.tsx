@@ -5,15 +5,15 @@ import MediaPicker from './MediaPicker'
 import SkeletonGrid from './SkeletonGrid'
 
 interface GameBoardProps {
-  /** Hata durumunda "tekrar dene" hangi oyunu başlatsın */
+  /** Which game "try again" should start after an error */
   onRetry: () => void
-  /** İlk yükleme ekranında gösterilecek metin */
+  /** Text shown on the initial loading screen */
   loadingLabel?: string
 }
 
 /**
- * Oyun tahtası: zincir + seçim ızgaraları. Serbest oyun ve günlük bulmaca
- * aynı tahtayı kullanır, sadece üstteki başlık/HUD kısmı farklıdır.
+ * Game board: chain + picker grids. Free play and the daily puzzle share
+ * the same board; only the header/HUD on top differs.
  */
 export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
   const {
@@ -38,11 +38,11 @@ export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
             !
           </span>
           <div className="alert-body">
-            <strong>Bir şeyler ters gitti</strong>
+            <strong>Something went wrong</strong>
             <span>{error}</span>
           </div>
           <button className="btn-ghost" onClick={onRetry}>
-            Tekrar dene
+            Try again
           </button>
         </div>
       )}
@@ -74,7 +74,7 @@ export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
       {status === 'loading' && !game && (
         <div className="page-loading">
           <span className="brand-mark brand-mark--spin" aria-hidden="true" />
-          <p>{loadingLabel ?? 'Yeni bir eşleşme hazırlanıyor…'}</p>
+          <p>{loadingLabel ?? 'Setting up a new matchup…'}</p>
         </div>
       )}
     </>

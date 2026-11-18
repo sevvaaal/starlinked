@@ -22,7 +22,7 @@ class DailyGameResponse(BaseModel):
 
     date: str
     number: int
-    """Kaçıncı günlük bulmaca — paylaşım metninde geçer."""
+    """Which daily puzzle number this is — shown in the share text."""
     par: int
     """Shortest possible chain length in moves, over the pool graph."""
     next_in_seconds: int
@@ -78,8 +78,8 @@ class SolutionResponse(BaseModel):
 
 
 class MCQRoundResponse(BaseModel):
-    """Çoktan seçmeli 'oyunculardan yapımı bul' turu — cevap açıkça gönderilir,
-    tıpkı SolutionResponse gibi; client-side reveal ilerlemesi kontrol eder."""
+    """Multiple-choice 'guess the title from the cast' round — the answer is sent
+    openly, just like SolutionResponse; the client controls the reveal progress."""
 
     options: list[MediaBrief]
     answer: MediaBrief

@@ -1,9 +1,11 @@
 /**
- * Kişisel istatistikler — tarayıcıda saklanır, sunucu ya da hesap gerekmez.
- * localStorage erişimi (gizli sekme, kapalı çerezler) her yerde try/catch'li.
+ * Personal stats — stored in the browser, no server or account needed.
+ * Every localStorage access is wrapped in try/catch (private tabs, blocked cookies).
  */
 
-const STORAGE_KEY = 'dizilink:stats:v1'
+const STORAGE_KEY = 'starlinked:stats:v1'
+/** Key used before the rename to Starlinked — still read so existing scores carry over. */
+const LEGACY_STORAGE_KEY = 'dizilink:stats:v1'
 
 export interface GameRecord {
   moves: number
@@ -12,14 +14,14 @@ export interface GameRecord {
   targetTitle: string
   /** Unix ms */
   at: number
-  /** En kısa çözümle eşleşti mi — solution gecikmeli geldiği için sonradan patchlenir. */
+  /** Whether it matched the shortest solution — patched in later because the solution arrives late. */
   optimal?: boolean
-  /** Zincirde en az bir yönetmen bağlantısı kullanıldı mı */
+  /** Whether at least one director link was used in the chain */
   usedDirector?: boolean
 }
 
 interface StatsData {
-  /** Başlatılan oyun sayısı — tamamlama oranı için */
+  /** Number of games started — for the completion rate */
   started: number
   wins: GameRecord[]
 }
@@ -28,7 +30,7 @@ const EMPTY: StatsData = { started: 0, wins: [] }
 
 function read(): StatsData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = (localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY))
     if (!raw) return EMPTY
     const parsed = JSON.parse(raw) as Partial<StatsData>
     return {
@@ -44,7 +46,7 @@ function write(data: StatsData): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   } catch {
-    // Depolama yoksa istatistik tutmayı sessizce bırak — oyun yine oynanır.
+    // No storage? Quietly stop tracking stats — the game still plays.
   }
 }
 
@@ -55,24 +57,25 @@ export function recordStart(): void {
 
 export function recordWin(record: GameRecord): void {
   const data = read()
-  // Son 100 oyunu tut, fazlası hem gereksiz hem de depolama şişirir.
+  // Keep the last 100 games; more is unnecessary and bloats storage.
   write({ ...data, wins: [...data.wins, record].slice(-100) })
 }
 
 export function clearStats(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(LEGACY_STORAGE_KEY)
   } catch {
-    // yoksay
+    // ignore
   }
 }
 
-/** Rozet hesaplaması için tam liste — `.recent` gibi 10 kayıtla sınırlı değil. */
+/** Full list for badge calculation — not capped at 10 like `.recent`. */
 export function getAllWins(): GameRecord[] {
   return read().wins.slice()
 }
 
-/** Bir kazanımı `at` damgasından bulup üstüne yazar. Bulunamazsa sessizce vazgeçer. */
+/** Finds a win by its `at` timestamp and patches it. Does nothing if it isn't found. */
 export function patchWin(at: number, patch: Partial<Pick<GameRecord, 'optimal'>>): void {
   const data = read()
   const index = data.wins.findIndex((win) => win.at === at)
@@ -90,7 +93,7 @@ export interface StatsSummary {
   averageMoves: number | null
   fastestSeconds: number | null
   totalSeconds: number
-  /** En yeniden eskiye, en fazla 10 kayıt */
+  /** Newest to oldest, at most 10 records */
   recent: GameRecord[]
 }
 

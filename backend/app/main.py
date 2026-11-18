@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
     warmup.cancel()
 
 
-app = FastAPI(title="Dizilink API", lifespan=lifespan)
+app = FastAPI(title="Starlinked API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin],

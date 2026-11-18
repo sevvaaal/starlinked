@@ -1,13 +1,15 @@
 /**
- * "Oyunculardan Film Bul" mini oyununun kişisel skoru — tarayıcıda saklanır.
- * stats.ts/daily.ts/achievements.ts'e bilinçli olarak karıştırılmıyor: farklı
- * bir mekanik/ölçek, bu turun kapsamı sadece kişisel en iyiyi göstermek.
+ * Personal score for the "Guess from the Cast" mini game — stored in the browser.
+ * Deliberately kept out of stats.ts/daily.ts/achievements.ts: it's a different
+ * mechanic and scale, and for now it only shows a personal best.
  */
 
-const STORAGE_KEY = 'dizilink:guess-cast:v1'
+const STORAGE_KEY = 'starlinked:guess-cast:v1'
+/** Key used before the rename to Starlinked — still read so existing scores carry over. */
+const LEGACY_STORAGE_KEY = 'dizilink:guess-cast:v1'
 
 export interface GuessCastResult {
-  /** Kaç oyuncu fotoğrafıyla bulundu — düşük daha iyi */
+  /** How many actor photos it took — lower is better */
   revealedCount: number
   /** Unix ms */
   at: number
@@ -15,7 +17,7 @@ export interface GuessCastResult {
 
 function read(): GuessCastResult | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = (localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY))
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<GuessCastResult>
     if (typeof parsed.revealedCount !== 'number' || typeof parsed.at !== 'number') return null
@@ -25,14 +27,14 @@ function read(): GuessCastResult | null {
   }
 }
 
-/** Sadece kişisel en iyiyi (en az açılan oyuncu sayısını) tutar. */
+/** Keeps only the personal best (fewest actors revealed). */
 export function recordGuessCastWin(result: GuessCastResult): void {
   const best = read()
   if (best !== null && best.revealedCount <= result.revealedCount) return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(result))
   } catch {
-    // Depolama yoksa sessizce vazgeç — oyun yine oynanır.
+    // No storage? Quietly give up — the game still plays.
   }
 }
 

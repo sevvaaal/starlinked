@@ -10,18 +10,18 @@ function mediaKey(media: MediaBrief): string {
 }
 
 function tier(revealedCount: number): string {
-  if (revealedCount <= 1) return 'Efsane'
-  if (revealedCount === 2) return 'Çok iyi'
-  if (revealedCount === 3) return 'İyi iş'
-  return 'Tamamlandı'
+  if (revealedCount <= 1) return 'Legendary'
+  if (revealedCount === 2) return 'Great'
+  if (revealedCount === 3) return 'Nice work'
+  return 'Completed'
 }
 
 type Status = 'loading' | 'error' | 'playing' | 'won'
 
 /**
- * Kendi başına duran bir mini oyun — GameContext'e hiç dokunmuyor. Ana oyunun
- * state makinesine sokmak (zincir kurma, süre sınırı, çözüm arama...)
- * gereksiz karmaşıklık olurdu, burada sadece "tur getir → tahmin et" var.
+ * A standalone mini game — it doesn't touch GameContext at all. Pushing it into
+ * the main game's state machine (chain building, time limits, solution lookup...)
+ * would be needless complexity; here it's just "fetch a round → guess".
  */
 export default function GuessTheCast() {
   const [round, setRound] = useState<MCQRoundResponse | null>(null)
@@ -41,7 +41,7 @@ export default function GuessTheCast() {
       setRound(response)
       setStatus('playing')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Tur yüklenemedi')
+      setError(err instanceof Error ? err.message : 'Could not load the round')
       setStatus('error')
     }
   }
@@ -68,17 +68,17 @@ export default function GuessTheCast() {
   return (
     <div className="page page--doc">
       <header className="page-head">
-        <span className="page-eyebrow">Mini Oyun</span>
-        <h1 className="page-title">Oyunculardan Film Bul</h1>
+        <span className="page-eyebrow">Mini Game</span>
+        <h1 className="page-title">Guess from the Cast</h1>
         <p className="page-lead">
-          Kadro fotoğraflarına bakıp doğru yapımı 4 seçenekten bul. Ne kadar az ipucuyla
-          bulursan skorun o kadar iyi.
+          Look at the cast photos and pick the right title out of 4 options. The fewer clues you
+          need, the better your score.
         </p>
       </header>
 
       <section className="picker window--lilac">
         <div className="window-bar">
-          <span className="window-title">OYUNCULARDAN_FILM_BUL</span>
+          <span className="window-title">GUESS_FROM_CAST</span>
           <span className="window-dots" aria-hidden="true">
             <span />
             <span />
@@ -90,7 +90,7 @@ export default function GuessTheCast() {
           {status === 'loading' && (
             <div className="page-loading">
               <span className="brand-mark brand-mark--spin" aria-hidden="true" />
-              <p>Tur hazırlanıyor…</p>
+              <p>Preparing a round…</p>
             </div>
           )}
 
@@ -100,11 +100,11 @@ export default function GuessTheCast() {
                 !
               </span>
               <div className="alert-body">
-                <strong>Bir şeyler ters gitti</strong>
+                <strong>Something went wrong</strong>
                 <span>{error}</span>
               </div>
               <button className="btn-ghost" onClick={() => void loadRound()}>
-                Tekrar dene
+                Try again
               </button>
             </div>
           )}
@@ -118,22 +118,22 @@ export default function GuessTheCast() {
                   <div className="win-stats">
                     <div className="win-stat">
                       <span className="win-stat-value">{revealedCount}</span>
-                      <span className="win-stat-label">ipucu</span>
+                      <span className="win-stat-label">{revealedCount === 1 ? 'clue' : 'clues'}</span>
                     </div>
                   </div>
                   {best && (
-                    <p className="win-optimal-note">Kişisel en iyin: {best.revealedCount} ipucu</p>
+                    <p className="win-optimal-note">Personal best: {best.revealedCount} {best.revealedCount === 1 ? 'clue' : 'clues'}</p>
                   )}
                   <button className="btn-primary btn-lg" onClick={() => void loadRound()}>
-                    Yeni tur
+                    New round
                   </button>
                 </div>
               ) : (
                 <div className="picker-head">
                   <span className="step-badge">
-                    İpucu {revealedCount}/{round.cast.length}
+                    Clue {revealedCount}/{round.cast.length}
                   </span>
-                  <h2>Bu oyuncular hangi yapımda oynadı?</h2>
+                  <h2>Which title do these actors share?</h2>
                 </div>
               )}
 
@@ -172,7 +172,7 @@ export default function GuessTheCast() {
                           </div>
                         )}
                         <span className={`type-badge type-badge--${option.media_type}`}>
-                          {option.media_type === 'movie' ? 'Film' : 'Dizi'}
+                          {option.media_type === 'movie' ? 'Movie' : 'TV'}
                         </span>
                       </div>
                       <span className="pick-card-title">{option.title}</span>
@@ -186,8 +186,8 @@ export default function GuessTheCast() {
       </section>
 
       <p className="doc-link-row">
-        <Link to="/mini-oyunlar" className="text-link">
-          ← Mini oyunlara dön
+        <Link to="/mini-games" className="text-link">
+          ← Back to mini games
         </Link>
       </p>
     </div>

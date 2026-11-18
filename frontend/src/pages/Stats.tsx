@@ -5,7 +5,7 @@ import { clearDaily, getDailyStats, puzzleDateNow } from '../daily'
 import { BADGES, evaluateUnlockedBadges } from '../achievements'
 
 function formatDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString('tr-TR', {
+  return new Date(timestamp).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -14,7 +14,7 @@ function formatDate(timestamp: number): string {
 }
 
 export default function Stats() {
-  // Silme işleminden sonra yeniden okumak için basit bir sayaç
+  // A simple counter to re-read the data after clearing
   const [version, setVersion] = useState(0)
   const [confirming, setConfirming] = useState(false)
   const summary = getSummary()
@@ -30,7 +30,7 @@ export default function Stats() {
 
   const badgeGallery = (
     <section className="doc-section">
-      <h2 className="section-title">Rozetlerin</h2>
+      <h2 className="section-title">Your badges</h2>
       <div className="badge-grid">
         {BADGES.map((badge) => {
           const unlocked = unlockedIds.has(badge.id)
@@ -55,18 +55,18 @@ export default function Stats() {
     return (
       <div className="page page--doc" key={version}>
         <header className="page-head">
-          <span className="page-eyebrow">İstatistikler</span>
-          <h1 className="page-title">Henüz skorun yok</h1>
+          <span className="page-eyebrow">Stats</span>
+          <h1 className="page-title">No scores yet</h1>
           <p className="page-lead">
             {summary.started > 0
-              ? `${summary.started} oyun başlatmışsın ama henüz birini bitirmemişsin. İlk zincirini tamamla, buraya yazalım.`
-              : 'İlk oyununu tamamladığında hamle sayın, süren ve rekorların burada birikmeye başlayacak.'}
+              ? `You've started ${summary.started} ${summary.started === 1 ? 'game' : 'games'} but haven't finished one yet. Complete your first chain and it'll show up here.`
+              : 'Once you finish your first game, your moves, times and records will start piling up here.'}
           </p>
         </header>
         {badgeGallery}
         <section className="cta">
-          <Link to="/oyna" className="btn-primary btn-lg">
-            Oynamaya başla
+          <Link to="/play" className="btn-primary btn-lg">
+            Start playing
           </Link>
         </section>
       </div>
@@ -76,24 +76,24 @@ export default function Stats() {
   return (
     <div className="page page--doc" key={version}>
       <header className="page-head">
-        <span className="page-eyebrow">İstatistikler</span>
-        <h1 className="page-title">Skorların</h1>
+        <span className="page-eyebrow">Stats</span>
+        <h1 className="page-title">Your scores</h1>
         <p className="page-lead">
-          Bu veriler yalnızca bu tarayıcıda saklanır. Hesap yok, sunucuya bir şey gitmiyor.
+          This data is stored only in this browser. No account, nothing is sent to a server.
         </p>
       </header>
 
       {summary.won > 0 && (
         <section className="stat-grid">
-          <StatTile value={summary.won} label="tamamlanan oyun" tone="mint" />
-          <StatTile value={summary.bestMoves} label="en iyi hamle" tone="pink" highlight />
-          <StatTile value={summary.averageMoves} label="ortalama hamle" />
+          <StatTile value={summary.won} label="games completed" tone="mint" />
+          <StatTile value={summary.bestMoves} label="best moves" tone="pink" highlight />
+          <StatTile value={summary.averageMoves} label="average moves" />
           <StatTile
             value={summary.fastestSeconds !== null ? formatDuration(summary.fastestSeconds) : '—'}
-            label="en hızlı süre"
+            label="fastest time"
           />
-          <StatTile value={`%${summary.completionRate}`} label="tamamlama oranı" />
-          <StatTile value={formatDuration(summary.totalSeconds)} label="toplam süre" />
+          <StatTile value={`${summary.completionRate}%`} label="completion rate" />
+          <StatTile value={formatDuration(summary.totalSeconds)} label="total time" />
         </section>
       )}
 
@@ -101,24 +101,24 @@ export default function Stats() {
 
       {dailyStats.played > 0 && (
         <section className="doc-section">
-          <h2 className="section-title">Günlük bulmaca</h2>
+          <h2 className="section-title">Daily puzzle</h2>
           <section className="stat-grid">
-            <StatTile value={dailyStats.currentStreak} label="güncel seri" tone="mint" highlight />
-            <StatTile value={dailyStats.bestStreak} label="en uzun seri" tone="pink" />
-            <StatTile value={dailyStats.played} label="oynanan gün" />
-            <StatTile value={dailyStats.perfect} label="kusursuz gün" />
-            <StatTile value={dailyStats.bestMoves} label="en iyi hamle" />
-            <StatTile value={dailyStats.averageMoves} label="ortalama hamle" />
+            <StatTile value={dailyStats.currentStreak} label="current streak" tone="mint" highlight />
+            <StatTile value={dailyStats.bestStreak} label="best streak" tone="pink" />
+            <StatTile value={dailyStats.played} label="days played" />
+            <StatTile value={dailyStats.perfect} label="perfect days" />
+            <StatTile value={dailyStats.bestMoves} label="best moves" />
+            <StatTile value={dailyStats.averageMoves} label="average moves" />
           </section>
 
           <div className="table-wrap">
             <table className="record-table">
               <thead>
                 <tr>
-                  <th>Bulmaca</th>
-                  <th className="num">Hamle</th>
-                  <th className="num">Hedef</th>
-                  <th className="num">Süre</th>
+                  <th>Puzzle</th>
+                  <th className="num">Moves</th>
+                  <th className="num">Par</th>
+                  <th className="num">Time</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,15 +150,15 @@ export default function Stats() {
 
       {summary.won > 0 && (
         <section className="doc-section">
-          <h2 className="section-title">Son oyunlar</h2>
+          <h2 className="section-title">Recent games</h2>
           <div className="table-wrap">
             <table className="record-table">
               <thead>
                 <tr>
-                  <th>Eşleşme</th>
-                  <th className="num">Hamle</th>
-                  <th className="num">Süre</th>
-                  <th className="num">Tarih</th>
+                  <th>Matchup</th>
+                  <th className="num">Moves</th>
+                  <th className="num">Time</th>
+                  <th className="num">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,19 +191,19 @@ export default function Stats() {
       <section className="danger-zone">
         {confirming ? (
           <>
-            <p>Tüm istatistiklerin kalıcı olarak silinecek. Emin misin?</p>
+            <p>All your stats will be permanently deleted. Are you sure?</p>
             <div className="danger-actions">
               <button className="btn-danger" onClick={handleClear}>
-                Evet, sil
+                Yes, delete
               </button>
               <button className="btn-ghost" onClick={() => setConfirming(false)}>
-                Vazgeç
+                Cancel
               </button>
             </div>
           </>
         ) : (
           <button className="btn-ghost btn-ghost--quiet" onClick={() => setConfirming(true)}>
-            İstatistikleri sıfırla
+            Reset stats
           </button>
         )}
       </section>

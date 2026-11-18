@@ -1,33 +1,35 @@
 /**
- * Günlük bulmaca sonuçları — tarayıcıda saklanır, hesap gerekmez.
- * Genel istatistiklerden ayrı tutulur: burada gün gün seri (streak) tutuyoruz,
- * o yüzden kayıt anahtarı tarih.
+ * Daily puzzle results — stored in the browser, no account needed.
+ * Kept apart from the general stats: this tracks day-by-day streaks,
+ * so records are keyed by date.
  */
 
-const STORAGE_KEY = 'dizilink:daily:v1'
+const STORAGE_KEY = 'starlinked:daily:v1'
+/** Key used before the rename to Starlinked — still read so existing scores carry over. */
+const LEGACY_STORAGE_KEY = 'dizilink:daily:v1'
 const MAX_RESULTS = 365
 
 export interface DailyResult {
-  /** YYYY-AA-GG — sunucunun verdiği bulmaca günü */
+  /** YYYY-MM-DD — the puzzle day as given by the server */
   date: string
   number: number
   moves: number
-  /** O gün için hedef hamle sayısı — havuzdaki en kısa yol */
+  /** Par for that day — the shortest path in the pool */
   par: number
   seconds: number
   startTitle: string
   targetTitle: string
   /** Unix ms */
   at: number
-  /** En kısa çözümle eşleşti mi — solution gecikmeli geldiği için sonradan patchlenir. */
+  /** Whether it matched the shortest solution — patched in later because the solution arrives late. */
   optimal?: boolean
-  /** Zincirde en az bir yönetmen bağlantısı kullanıldı mı */
+  /** Whether at least one director link was used in the chain */
   usedDirector?: boolean
 }
 
 function read(): DailyResult[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = (localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY))
     if (!raw) return []
     const parsed = JSON.parse(raw) as unknown
     return Array.isArray(parsed) ? (parsed as DailyResult[]) : []
@@ -40,13 +42,13 @@ function write(results: DailyResult[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(results.slice(-MAX_RESULTS)))
   } catch {
-    // Depolama yoksa sessizce vazgeç — oyun yine oynanır, seri tutulmaz.
+    // No storage? Quietly give up — the game still plays, the streak just isn't kept.
   }
 }
 
 /**
- * Bulmaca gününün istemci tarafındaki tahmini (sunucu +03:00 kullanır).
- * Sadece menü rozeti gibi kozmetik yerlerde kullanılır; asıl gün sunucudan gelir.
+ * Client-side estimate of the puzzle day (the server uses +03:00).
+ * Only used for cosmetic things like the menu dot; the real day comes from the server.
  */
 export function puzzleDateNow(): string {
   return new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10)
@@ -56,7 +58,7 @@ export function getDailyResult(date: string): DailyResult | null {
   return read().find((result) => result.date === date) ?? null
 }
 
-/** Aynı gün ikinci kez kazanmak kaydı bozmasın diye ilk sonuç korunur. */
+/** The first result is kept so winning a second time on the same day doesn't overwrite it. */
 export function recordDailyResult(result: DailyResult): void {
   const results = read()
   if (results.some((existing) => existing.date === result.date)) return
@@ -68,17 +70,18 @@ export function recordDailyResult(result: DailyResult): void {
 export function clearDaily(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(LEGACY_STORAGE_KEY)
   } catch {
-    // yoksay
+    // ignore
   }
 }
 
-/** Rozet hesaplaması için tam liste — `.recent` gibi 10 kayıtla sınırlı değil. */
+/** Full list for badge calculation — not capped at 10 like `.recent`. */
 export function getAllDailyResults(): DailyResult[] {
   return read().slice()
 }
 
-/** Bir günlük sonucu `date` anahtarından bulup üstüne yazar. Bulunamazsa sessizce vazgeçer. */
+/** Finds a daily result by its `date` key and patches it. Does nothing if it isn't found. */
 export function patchDailyResult(date: string, patch: Partial<Pick<DailyResult, 'optimal'>>): void {
   const results = read()
   const index = results.findIndex((result) => result.date === date)
@@ -88,7 +91,7 @@ export function patchDailyResult(date: string, patch: Partial<Pick<DailyResult, 
   write(next)
 }
 
-/** YYYY-AA-GG tarihini gün cinsinden kaydırır (UTC'de hesaplanır, sapma olmaz). */
+/** Shifts a YYYY-MM-DD date by a number of days (computed in UTC, so no drift). */
 function shiftDate(date: string, days: number): string {
   const [year, month, day] = date.split('-').map(Number)
   const shifted = new Date(Date.UTC(year, month - 1, day + days))
@@ -99,17 +102,17 @@ export interface DailyStats {
   played: number
   currentStreak: number
   bestStreak: number
-  /** Hedefi yakaladığın (ya da kırdığın) gün sayısı */
+  /** Number of days you matched (or beat) par */
   perfect: number
   bestMoves: number | null
   averageMoves: number | null
-  /** En yeniden eskiye, en fazla 10 kayıt */
+  /** Newest to oldest, at most 10 records */
   recent: DailyResult[]
 }
 
 /**
- * Seriler tarih üstünden hesaplanır: bugünkü bulmaca henüz oynanmadıysa seri
- * kırılmış sayılmaz — dünü oynadıysan seri bugün akşama kadar ayakta.
+ * Streaks are computed from dates: if today's puzzle hasn't been played yet the
+ * streak isn't broken — if you played yesterday, it stays alive through today.
  */
 export function getDailyStats(today: string): DailyStats {
   const results = read()
@@ -162,21 +165,21 @@ function formatClock(totalSeconds: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`
 }
 
-/** Paylaşım metni — spoiler yok, yapım adları geçmez. */
+/** Share text — no spoilers, no titles mentioned. */
 export function buildShareText(result: DailyResult, url: string): string {
   const perfect = result.moves <= result.par
   const rail = `🎬${'🔗'.repeat(Math.min(result.moves, 12))}🎯`
-  const parNote = perfect ? ' ⭐' : ` (hedef ${result.par})`
+  const parNote = perfect ? ' ⭐' : ` (par ${result.par})`
 
   return [
-    `dizilink · Günlük #${result.number}`,
+    `starlinked · Daily #${result.number}`,
     rail,
-    `${result.moves} hamle${parNote} · ⏱ ${formatClock(result.seconds)}`,
+    `${result.moves} ${result.moves === 1 ? 'move' : 'moves'}${parNote} · ⏱ ${formatClock(result.seconds)}`,
     url,
   ].join('\n')
 }
 
-/** Geri sayım için "04:12:59" biçimi. */
+/** "04:12:59" format for the countdown. */
 export function formatCountdown(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)

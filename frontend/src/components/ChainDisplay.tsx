@@ -6,14 +6,14 @@ import { profileUrl } from '../images'
 
 interface ChainDisplayProps {
   chain: ChainNode[]
-  /** Hazır bir çözüm gösterilirken kapatılır — oyuncu orada "durmuyor". */
+  /** Turned off when showing a ready-made solution — the player isn't "standing" there. */
   showCurrent?: boolean
 }
 
 export default function ChainDisplay({ chain, showCurrent = true }: ChainDisplayProps) {
   const railRef = useRef<HTMLDivElement>(null)
 
-  // Zincir uzadıkça son halkaya kaydır, kullanıcı elle aramasın.
+  // Scroll to the last link as the chain grows so the user doesn't have to hunt for it.
   useEffect(() => {
     const rail = railRef.current
     if (!rail) return
@@ -23,10 +23,10 @@ export default function ChainDisplay({ chain, showCurrent = true }: ChainDisplay
   const lastIndex = Math.max(chain.length - 1, 1)
 
   return (
-    <section className="chain" aria-label="Kurduğun zincir">
+    <section className="chain" aria-label="Your chain">
       <div className="chain-rail" ref={railRef}>
         {chain.map((node, index) => {
-          // 0 → pembe (başlangıç), 1 → mint (hedefe yaklaşma)
+          // 0 → pink (start), 1 → mint (approaching the target)
           const progress = index / lastIndex
           const isLast = index === chain.length - 1
 
@@ -44,7 +44,7 @@ export default function ChainDisplay({ chain, showCurrent = true }: ChainDisplay
               {node.kind === 'media' ? (
                 <div className={`chain-node${isLast && showCurrent ? ' chain-node--current' : ''}`}>
                   <MediaCard media={node.media} size="sm" />
-                  {isLast && showCurrent && <span className="chain-here">buradasın</span>}
+                  {isLast && showCurrent && <span className="chain-here">you are here</span>}
                 </div>
               ) : (
                 <div className="chain-actor">
@@ -61,7 +61,7 @@ export default function ChainDisplay({ chain, showCurrent = true }: ChainDisplay
                     </div>
                   )}
                   <span className="chain-actor-name">{node.actor.name}</span>
-                  {node.actor.is_director && <span className="chain-actor-role">yönetmen</span>}
+                  {node.actor.is_director && <span className="chain-actor-role">director</span>}
                 </div>
               )}
             </div>

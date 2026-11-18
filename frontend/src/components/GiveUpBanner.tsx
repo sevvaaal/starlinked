@@ -4,13 +4,13 @@ import ChainDisplay from './ChainDisplay'
 interface GiveUpBannerProps {
   solution: SolutionResponse | null
   onPlayAgain: () => void
-  /** Günlük bulmacada yeni oyun başlatılamaz — buton gizlenir. */
+  /** A new game can't be started from the daily puzzle — the button is hidden. */
   showPlayAgain?: boolean
-  /** 'timeout' ise süresi dolduğu için bittiğini anlatan metin gösterilir. */
+  /** With 'timeout', the text explains the game ended because time ran out. */
   reason?: 'gave-up' | 'timeout'
 }
 
-/** Çözümü, oyuncunun kendi zinciriyle aynı görünen bir zincire çevirir. */
+/** Turns a solution into a chain that looks just like the player's own. */
 export function solutionToChain(solution: SolutionResponse): ChainNode[] {
   const nodes: ChainNode[] = [{ kind: 'media', media: solution.start }]
   for (const step of solution.steps) {
@@ -31,24 +31,24 @@ export default function GiveUpBanner({
   return (
     <section className="win">
       <div className="win-card">
-        <span className="win-rating win-rating--giveup">{isTimeout ? 'Süre doldu' : 'Pes ettin'}</span>
-        <h2 className="win-title">{isTimeout ? 'Zaman yetmedi' : 'Bu sefer olmadı'}</h2>
+        <span className="win-rating win-rating--giveup">{isTimeout ? 'Time\'s up' : 'You gave up'}</span>
+        <h2 className="win-title">{isTimeout ? 'Out of time' : 'Not this time'}</h2>
         <p className="giveup-note">
           {solution
-            ? `En kısa yol ${solution.hops} hamleymiş — işte bir çözüm.`
-            : 'Bu eşleşme için örnek bir çözüm getirilemedi.'}
+            ? `The shortest path was ${solution.hops} ${solution.hops === 1 ? 'move' : 'moves'} — here's one solution.`
+            : 'Could not load an example solution for this matchup.'}
         </p>
 
         {showPlayAgain && (
           <button className="btn-primary btn-lg" onClick={onPlayAgain}>
-            Yeni oyun
+            New game
           </button>
         )}
       </div>
 
       {solution && (
         <div className="win-chain">
-          <h3 className="win-chain-title">Örnek çözüm</h3>
+          <h3 className="win-chain-title">Example solution</h3>
           <ChainDisplay chain={solutionToChain(solution)} showCurrent={false} />
         </div>
       )}

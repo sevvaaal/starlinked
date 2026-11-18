@@ -1,9 +1,9 @@
-/** Veri gelene kadar gridin yerini tutar — sayfanın zıplamasını önler. */
+/** Holds the grid's place until data arrives — keeps the page from jumping. */
 export default function SkeletonGrid() {
   return (
     <div className="picker" aria-busy="true" aria-live="polite">
       <div className="window-bar">
-        <span className="window-title">YUKLENIYOR…</span>
+        <span className="window-title">LOADING…</span>
         <span className="window-dots" aria-hidden="true">
           <span />
           <span />
@@ -24,7 +24,7 @@ export default function SkeletonGrid() {
           </div>
         ))}
       </div>
-        <span className="sr-only">Yükleniyor</span>
+        <span className="sr-only">Loading</span>
       </div>
     </div>
   )

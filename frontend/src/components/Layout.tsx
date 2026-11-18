@@ -4,20 +4,20 @@ import { useGame } from '../game/GameContext'
 import { getDailyResult, puzzleDateNow } from '../daily'
 
 const NAV_ITEMS = [
-  { to: '/gunluk', label: 'Günlük' },
-  { to: '/oyna', label: 'Oyna' },
-  { to: '/mini-oyunlar', label: 'Mini Oyunlar' },
-  { to: '/nasil-oynanir', label: 'Kurallar' },
-  { to: '/istatistikler', label: 'Skorlar' },
+  { to: '/daily', label: 'Daily' },
+  { to: '/play', label: 'Play' },
+  { to: '/mini-games', label: 'Mini Games' },
+  { to: '/how-to-play', label: 'Rules' },
+  { to: '/stats', label: 'Scores' },
 ]
 
 export default function Layout() {
   const { isActive } = useGame()
   const { pathname } = useLocation()
-  // Bugünün bulmacası henüz oynanmadıysa menüde işaret bırak.
+  // Leave a marker in the menu if today's puzzle hasn't been played yet.
   const dailyPending = getDailyResult(puzzleDateNow()) === null
 
-  // Sayfa değişince başa dön — yoksa yeni sayfaya ortasından girilmiş gibi olur.
+  // Scroll to the top on page change — otherwise you land in the middle of the new page.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [pathname])
@@ -25,12 +25,12 @@ export default function Layout() {
   return (
     <div className="app">
       <header className="topbar">
-        <NavLink to="/" className="brand" aria-label="Dizilink ana sayfa">
+        <NavLink to="/" className="brand" aria-label="Starlinked home">
           <span className="brand-mark" aria-hidden="true" />
-          <span className="brand-name">dizilink</span>
+          <span className="brand-name">starlinked</span>
         </NavLink>
 
-        <nav className="nav" aria-label="Ana menü">
+        <nav className="nav" aria-label="Main menu">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
@@ -38,14 +38,14 @@ export default function Layout() {
               className={({ isActive: linkActive }) => `nav-link${linkActive ? ' is-active' : ''}`}
             >
               {item.label}
-              {item.to === '/oyna' && isActive && (
-                <span className="nav-dot" title="Devam eden oyun" aria-label="Devam eden oyun var" />
+              {item.to === '/play' && isActive && (
+                <span className="nav-dot" title="Game in progress" aria-label="A game is in progress" />
               )}
-              {item.to === '/gunluk' && dailyPending && (
+              {item.to === '/daily' && dailyPending && (
                 <span
                   className="nav-dot nav-dot--daily"
-                  title="Bugünün bulmacası seni bekliyor"
-                  aria-label="Bugünün bulmacası oynanmadı"
+                  title="Today's puzzle is waiting for you"
+                  aria-label="Today's puzzle hasn't been played"
                 />
               )}
             </NavLink>
@@ -62,25 +62,24 @@ export default function Layout() {
           <div className="footer-brand">
             <span className="brand-mark" aria-hidden="true" />
             <span>
-              <strong>dizilink</strong>
-              <span className="footer-tagline">Film ve dizileri ortak oyuncularla bağla</span>
+              <strong>starlinked</strong>
+              <span className="footer-tagline">Link movies and TV shows through shared cast</span>
             </span>
           </div>
 
-          <nav className="footer-links" aria-label="Alt menü">
-            <NavLink to="/nasil-oynanir">Nasıl oynanır</NavLink>
-            <NavLink to="/istatistikler">İstatistikler</NavLink>
-            <NavLink to="/hakkinda">Hakkında</NavLink>
+          <nav className="footer-links" aria-label="Footer menu">
+            <NavLink to="/how-to-play">How to play</NavLink>
+            <NavLink to="/stats">Stats</NavLink>
+            <NavLink to="/about">About</NavLink>
           </nav>
         </div>
 
         <p className="footer-legal">
-          Film ve dizi verileri{' '}
+          Movie and TV data provided by{' '}
           <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer noopener">
             TMDB
-          </a>{' '}
-          tarafından sağlanmaktadır. Bu ürün TMDB tarafından onaylanmamıştır veya
-          sertifikalandırılmamıştır.
+          </a>
+          . This product uses the TMDB API but is not endorsed or certified by TMDB.
         </p>
       </footer>
     </div>

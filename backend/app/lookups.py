@@ -33,7 +33,7 @@ def _movie_directors(data: dict) -> list[CastMember]:
         CastMember(
             person_id=item["id"],
             name=item["name"],
-            character="Yönetmen",
+            character="Director",
             order=0,
             profile_path=item.get("profile_path"),
             is_director=True,
@@ -55,7 +55,7 @@ def _tv_directors(data: dict) -> list[CastMember]:
             CastMember(
                 person_id=item["id"],
                 name=item["name"],
-                character="Yönetmen",
+                character="Director",
                 order=0,
                 profile_path=item.get("profile_path"),
                 is_director=True,
@@ -221,7 +221,7 @@ async def get_person_directed_credits(person_id: int) -> ActorCreditsResponse:
                 media_id=media_id,
                 media_type=media_type,
                 title=title,
-                character="Yönetmen",
+                character="Director",
                 episode_count=None,
                 poster_path=item.get("poster_path"),
                 release_date=release_date,

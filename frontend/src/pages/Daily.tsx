@@ -13,7 +13,7 @@ import { formatDuration } from '../stats'
 
 function formatDay(date: string): string {
   const [year, month, day] = date.split('-').map(Number)
-  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('tr-TR', {
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -31,8 +31,8 @@ export default function Daily() {
   const [shareNote, setShareNote] = useState<string | null>(null)
 
   /**
-   * Önce günün künyesini alırız: bugünkü bulmaca zaten çözülmüşse oyunu hiç
-   * başlatmayız — Wordle gibi, gün başına tek deneme.
+   * Fetch the day's info first: if today's puzzle is already solved we never
+   * start the game — like Wordle, one attempt per day.
    */
   const bootstrapped = useRef(false)
   useEffect(() => {
@@ -51,12 +51,12 @@ export default function Daily() {
           startDailyGame()
         }
       } catch (err) {
-        setInfoError(err instanceof Error ? err.message : 'Günün bulmacası alınamadı')
+        setInfoError(err instanceof Error ? err.message : 'Could not load today\'s puzzle')
       }
     })()
   }, [startDailyGame])
 
-  // Oyun kazanıldığında sonucu depodan okuruz — kaydı context yazar.
+  // When the game is won, read the result from storage — the context writes the record.
   useEffect(() => {
     if (mode === 'daily' && status === 'won' && daily) {
       setResult(getDailyResult(daily.date))
@@ -74,18 +74,18 @@ export default function Daily() {
 
   const handleShare = useCallback(async () => {
     if (!result) return
-    const text = buildShareText(result, `${window.location.origin}/gunluk`)
+    const text = buildShareText(result, `${window.location.origin}/daily`)
     try {
       if (navigator.share) {
         await navigator.share({ text })
         return
       }
       await navigator.clipboard.writeText(text)
-      setShareNote('Sonuç panoya kopyalandı')
+      setShareNote('Result copied to clipboard')
     } catch {
-      // Paylaşım iptal edildiyse ses çıkarmaya gerek yok; kopyalama da
-      // başarısızsa kullanıcı metni elle seçebilsin diye uyarı bırakıyoruz.
-      setShareNote('Paylaşılamadı — metni elle kopyalayabilirsin')
+      // If sharing was cancelled there's nothing to say; if copying also fails
+      // we leave a note so the user can select the text manually.
+      setShareNote('Couldn\'t share — you can copy the text manually')
     }
   }, [result])
 
@@ -97,11 +97,11 @@ export default function Daily() {
             !
           </span>
           <div className="alert-body">
-            <strong>Günün bulmacası yüklenemedi</strong>
+            <strong>Today's puzzle couldn't be loaded</strong>
             <span>{infoError}</span>
           </div>
           <button className="btn-ghost" onClick={() => window.location.reload()}>
-            Tekrar dene
+            Try again
           </button>
         </div>
       </div>
@@ -117,39 +117,39 @@ export default function Daily() {
     <div className="page page--play">
       <header className="daily-head">
         <span className="daily-badge">
-          Günlük <strong>#{info ? info.number : '—'}</strong>
+          Daily <strong>#{info ? info.number : '—'}</strong>
         </span>
-        <p className="daily-date">{info ? formatDay(info.date) : 'Günün bulmacası hazırlanıyor…'}</p>
+        <p className="daily-date">{info ? formatDay(info.date) : 'Preparing today\'s puzzle…'}</p>
         {info && !solved && (
           <p className="daily-hint">
-            Herkes bugün aynı eşleşmeyi oynuyor. Hedef{' '}
-            <strong>{info.par} hamle</strong>.
+            Everyone plays the same matchup today. Par is{' '}
+            <strong>{info.par} {info.par === 1 ? 'move' : 'moves'}</strong>.
           </p>
         )}
       </header>
 
       {showBoard && daily && status !== 'won' && (
         <div className="hud">
-          <div className="hud-stats" aria-label="Oyun istatistikleri">
+          <div className="hud-stats" aria-label="Game stats">
             <div className="stat">
               <span className="stat-value">{moves}</span>
-              <span className="stat-label">hamle</span>
+              <span className="stat-label">moves</span>
             </div>
             <span className="stat-sep" aria-hidden="true" />
             <div className="stat">
               <span className="stat-value stat-value--mono">{formatDuration(elapsed)}</span>
-              <span className="stat-label">süre</span>
+              <span className="stat-label">time</span>
             </div>
             <span className="stat-sep" aria-hidden="true" />
             <div className="stat">
               <span className="stat-value">{daily.par}</span>
-              <span className="stat-label">hedef</span>
+              <span className="stat-label">par</span>
             </div>
           </div>
 
           <div className="hud-actions">
-            <button className="btn-ghost" onClick={giveUp} title="Bugünü bitir ve çözümü gör">
-              Pes et
+            <button className="btn-ghost" onClick={giveUp} title="End today's puzzle and see the solution">
+              Give up
             </button>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function Daily() {
 
       {showBoard && (
         <>
-          {/* Günlükte "yeni oyun" yok: gün başına tek eşleşme. */}
+          {/* No "new game" in the daily: one matchup per day. */}
           {daily && (
             <GameHeader
               game={daily}
@@ -167,7 +167,7 @@ export default function Daily() {
               showNewGame={false}
             />
           )}
-          <GameBoard onRetry={startDailyGame} loadingLabel="Günün eşleşmesi hazırlanıyor…" />
+          <GameBoard onRetry={startDailyGame} loadingLabel="Preparing today's matchup…" />
         </>
       )}
 
@@ -177,12 +177,12 @@ export default function Daily() {
           <div className="daily-next">
             {countdown !== null && countdown > 0 && (
               <>
-                <span className="daily-next-label">Yeni bulmacaya</span>
+                <span className="daily-next-label">Next puzzle in</span>
                 <span className="daily-countdown">{formatCountdown(countdown)}</span>
               </>
             )}
-            <Link to="/oyna" className="text-link">
-              Serbest oyunda tekrar dene →
+            <Link to="/play" className="text-link">
+              Try again in free play →
             </Link>
           </div>
         </>
@@ -192,9 +192,9 @@ export default function Daily() {
         <section className="daily-result">
           <div className="win-card">
             <span className="win-rating">
-              {result.moves <= result.par ? 'Kusursuz' : 'Tamamlandı'}
+              {result.moves <= result.par ? 'Perfect' : 'Completed'}
             </span>
-            <h2 className="win-title">Günlük #{result.number} çözüldü</h2>
+            <h2 className="win-title">Daily #{result.number} solved</h2>
             <p className="daily-matchup">
               <span className="record-start">{result.startTitle}</span>
               <span className="record-arrow" aria-hidden="true">
@@ -206,22 +206,22 @@ export default function Daily() {
             <div className="win-stats">
               <div className="win-stat">
                 <span className="win-stat-value">{result.moves}</span>
-                <span className="win-stat-label">hamle</span>
+                <span className="win-stat-label">moves</span>
               </div>
               <span className="win-stat-sep" aria-hidden="true" />
               <div className="win-stat">
                 <span className="win-stat-value">{result.par}</span>
-                <span className="win-stat-label">hedef</span>
+                <span className="win-stat-label">par</span>
               </div>
               <span className="win-stat-sep" aria-hidden="true" />
               <div className="win-stat">
                 <span className="win-stat-value">{formatDuration(result.seconds)}</span>
-                <span className="win-stat-label">süre</span>
+                <span className="win-stat-label">time</span>
               </div>
             </div>
 
             <button className="btn-primary btn-lg" onClick={() => void handleShare()}>
-              Sonucu paylaş
+              Share result
             </button>
             {shareNote && (
               <p className="daily-share-note" role="status">
@@ -234,19 +234,19 @@ export default function Daily() {
             <div className="daily-streaks">
               <div className="mini-stat">
                 <span className="mini-stat-value">{stats.currentStreak}</span>
-                <span className="mini-stat-label">güncel seri</span>
+                <span className="mini-stat-label">current streak</span>
               </div>
               <div className="mini-stat">
                 <span className="mini-stat-value">{stats.bestStreak}</span>
-                <span className="mini-stat-label">en uzun seri</span>
+                <span className="mini-stat-label">best streak</span>
               </div>
               <div className="mini-stat">
                 <span className="mini-stat-value">{stats.played}</span>
-                <span className="mini-stat-label">oynanan gün</span>
+                <span className="mini-stat-label">days played</span>
               </div>
               <div className="mini-stat">
                 <span className="mini-stat-value">{stats.perfect}</span>
-                <span className="mini-stat-label">kusursuz gün</span>
+                <span className="mini-stat-label">perfect days</span>
               </div>
             </div>
           )}
@@ -254,22 +254,22 @@ export default function Daily() {
           <div className="daily-next">
             {countdown !== null && countdown > 0 ? (
               <>
-                <span className="daily-next-label">Yeni bulmacaya</span>
+                <span className="daily-next-label">Next puzzle in</span>
                 <span className="daily-countdown">{formatCountdown(countdown)}</span>
               </>
             ) : (
               <button className="btn-ghost" onClick={() => window.location.reload()}>
-                Yeni bulmaca hazır — yenile
+                New puzzle ready — refresh
               </button>
             )}
-            <Link to="/oyna" className="text-link">
-              Beklemek istemiyorsan serbest oyna →
+            <Link to="/play" className="text-link">
+              Don't want to wait? Play free mode →
             </Link>
           </div>
 
           {mode === 'daily' && status === 'won' && chain.length > 0 && (
             <div className="win-chain">
-              <h3 className="win-chain-title">Kurduğun zincir</h3>
+              <h3 className="win-chain-title">Your chain</h3>
               <ChainDisplay chain={chain} />
             </div>
           )}

@@ -4,52 +4,52 @@ export default function About() {
   return (
     <div className="page page--doc">
       <header className="page-head">
-        <span className="page-eyebrow">Hakkında</span>
-        <h1 className="page-title">Dizilink nedir?</h1>
+        <span className="page-eyebrow">About</span>
+        <h1 className="page-title">What is Starlinked?</h1>
         <p className="page-lead">
-          Sinema dünyasının ne kadar küçük olduğunu gösteren küçük bir tarayıcı oyunu.
+          A small browser game that shows how small the world of film and TV really is.
         </p>
       </header>
 
       <section className="doc-section prose">
-        <h2 className="section-title">Fikir</h2>
+        <h2 className="section-title">The idea</h2>
         <p>
-          Neredeyse her film ve dizi, ortak oyuncular üzerinden birbirine bağlanabilir. Aradaki
-          mesafe genelde sandığından çok daha kısadır. Dizilink sana rastgele iki yapım verip
-          aradaki zinciri kurmanı ister — ve genellikle üç beş hamlede varabildiğini görünce
-          şaşırırsın.
+          Almost any movie or TV show can be linked to another through shared cast members, and
+          the distance is usually much shorter than you'd think. Starlinked gives you two random
+          titles and asks you to build the chain between them — and you'll often be surprised to
+          get there in just three to five moves.
         </p>
 
-        <h2 className="section-title">Veri kaynağı</h2>
+        <h2 className="section-title">Data source</h2>
         <p>
-          Tüm film, dizi ve oyuncu bilgileri{' '}
+          All movie, TV and cast data comes from the{' '}
           <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer noopener">
             TMDB
           </a>{' '}
-          API'sinden geliyor. Dizilink, TMDB tarafından onaylanmamış veya sertifikalandırılmamış
-          bağımsız bir projedir. Poster ve fotoğraf hakları ilgili sahiplerine aittir.
+          API. Starlinked is an independent project and is not endorsed or certified by TMDB.
+          Posters and photos belong to their respective owners.
         </p>
 
-        <h2 className="section-title">Verilerin</h2>
+        <h2 className="section-title">Your data</h2>
         <p>
-          Hesap açman gerekmiyor, hiçbir kişisel bilgi toplanmıyor. Skorların yalnızca senin
-          tarayıcının yerel deposunda tutulur; istediğin an{' '}
-          <Link to="/istatistikler">İstatistikler</Link> sayfasından silebilirsin. Başka bir
-          cihazda açtığında skorlarını görmemenin sebebi de bu.
+          No account needed, and no personal information is collected. Your scores are kept only
+          in your browser's local storage, and you can delete them any time from the{' '}
+          <Link to="/stats">Stats</Link> page. That's also why you won't see your scores on
+          another device.
         </p>
 
-        <h2 className="section-title">Teknik</h2>
+        <h2 className="section-title">Tech</h2>
         <p>
-          Arayüz React ve TypeScript ile, sunucu tarafı Python ve FastAPI ile yazıldı. TMDB
-          isteklerinin sonuçları sunucuda önbelleğe alınıyor, böylece oyun hızlı açılıyor ve API
-          gereksiz yere yorulmuyor.
+          The frontend is built with React and TypeScript, the backend with Python and FastAPI.
+          TMDB responses are cached on the server, so the game loads fast and the API isn't hit
+          more than it needs to be.
         </p>
       </section>
 
       <section className="cta">
-        <h2 className="cta-title">Denemek en iyisi</h2>
-        <Link to="/oyna" className="btn-primary btn-lg">
-          Oynamaya başla
+        <h2 className="cta-title">Best way to find out is to try</h2>
+        <Link to="/play" className="btn-primary btn-lg">
+          Start playing
         </Link>
       </section>
     </div>

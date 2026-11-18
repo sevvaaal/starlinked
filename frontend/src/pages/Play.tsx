@@ -8,11 +8,11 @@ import ResultModal from '../components/ResultModal'
 import { formatDuration } from '../stats'
 
 const DURATION_OPTIONS: { value: number | null; label: string }[] = [
-  { value: 60, label: '1 dk' },
-  { value: 180, label: '3 dk' },
-  { value: 300, label: '5 dk' },
-  { value: 600, label: '10 dk' },
-  { value: null, label: 'Sınırsız' },
+  { value: 60, label: '1 min' },
+  { value: 180, label: '3 min' },
+  { value: 300, label: '5 min' },
+  { value: 600, label: '10 min' },
+  { value: null, label: 'Unlimited' },
 ]
 
 export default function Play() {
@@ -37,8 +37,8 @@ export default function Play() {
   const isFinished = status === 'won' || status === 'gave-up' || status === 'timeout'
   const timeCritical = timeLeft !== null && timeLeft <= 20
 
-  // Günlük bulmacadan yarım kalmış halde buraya gelinirse (sekme değişimi
-  // gibi) serbest oyuna geç — iki modun ekranları burada karışmasın.
+  // If we land here with a daily puzzle still in progress (e.g. after switching
+  // tabs), switch to free play so the two modes' screens don't get mixed up.
   const resetOnDailyLeak = useRef(false)
   useEffect(() => {
     if (resetOnDailyLeak.current) return
@@ -46,8 +46,8 @@ export default function Play() {
     if (mode === 'daily') resetToSetup()
   }, [mode, resetToSetup])
 
-  // Oyun her bitişte biletini bir kez kendiliğinden açar — Wordle'daki gibi.
-  // Kullanıcı kapatırsa alttaki tam sonuç ekranı (WinBanner/GiveUpBanner) durur.
+  // Each time a game ends, its ticket opens once on its own — like in Wordle.
+  // If the user closes it, the full result screen below (WinBanner/GiveUpBanner) stays.
   const [ticketOpen, setTicketOpen] = useState(false)
   const ticketShownRef = useRef(false)
   useEffect(() => {
@@ -60,14 +60,14 @@ export default function Play() {
     }
   }, [showGame, isFinished])
 
-  // Henüz hiçbir oyun başlatılmadıysa süre seçimi ekranını göster —
-  // /oyna sayfasına girer girmez kendiliğinden başlamasın.
+  // If no game has started yet, show the time-limit picker so the game
+  // doesn't start by itself as soon as you open /play.
   if (status === 'idle') {
     return (
       <div className="page page--play">
         <section className="setup window window--yellow">
           <div className="window-bar">
-            <span className="window-title">OYUN_KURULUMU</span>
+            <span className="window-title">GAME_SETUP</span>
             <span className="window-dots" aria-hidden="true">
               <span />
               <span />
@@ -75,11 +75,11 @@ export default function Play() {
             </span>
           </div>
           <div className="window-body setup-body">
-            <h2 className="setup-title">Süreyi seç</h2>
+            <h2 className="setup-title">Choose a time limit</h2>
             <p className="setup-lead">
-              Hedefe kaç dakikada varacağını sen belirle. İstersen sınırsız oyna.
+              Decide how many minutes you get to reach the target — or play with no limit.
             </p>
-            <div className="duration-row" role="group" aria-label="Süre sınırı">
+            <div className="duration-row" role="group" aria-label="Time limit">
               {DURATION_OPTIONS.map((option) => (
                 <button
                   key={String(option.value)}
@@ -93,7 +93,7 @@ export default function Play() {
               ))}
             </div>
             <button className="btn-primary btn-lg" onClick={() => startNewGame()}>
-              Oyunu başlat
+              Start game
             </button>
           </div>
         </section>
@@ -105,26 +105,26 @@ export default function Play() {
     <div className="page page--play">
       {showGame && game && !isFinished && (
         <div className="hud">
-          <div className="hud-stats" aria-label="Oyun istatistikleri">
+          <div className="hud-stats" aria-label="Game stats">
             <div className="stat">
               <span className="stat-value">{moves}</span>
-              <span className="stat-label">hamle</span>
+              <span className="stat-label">moves</span>
             </div>
             <span className="stat-sep" aria-hidden="true" />
             <div className="stat">
               <span className={`stat-value stat-value--mono${timeCritical ? ' stat-value--critical' : ''}`}>
                 {formatDuration(timeLeft ?? elapsed)}
               </span>
-              <span className="stat-label">{timeLeft !== null ? 'kalan' : 'süre'}</span>
+              <span className="stat-label">{timeLeft !== null ? 'left' : 'time'}</span>
             </div>
           </div>
 
           <div className="hud-actions">
-            <button className="btn-ghost" onClick={giveUp} title="Oyunu bitir ve çözümü gör">
-              Pes et
+            <button className="btn-ghost" onClick={giveUp} title="End the game and see the solution">
+              Give up
             </button>
             <button className="btn-ghost btn-ghost--quiet" onClick={resetToSetup}>
-              Süreyi değiştir
+              Change time limit
             </button>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function Play() {
 
       {showGame && isFinished && game && !ticketOpen && (
         <button className="btn-ghost ticket-reopen" onClick={() => setTicketOpen(true)}>
-          🎟 Bileti tekrar gör
+          🎟 View ticket again
         </button>
       )}
 

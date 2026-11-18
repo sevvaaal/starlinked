@@ -13,13 +13,13 @@ export interface NewGameResponse {
 }
 
 export interface DailyGameResponse extends NewGameResponse {
-  /** YYYY-AA-GG, oyunun saat dilimine göre */
+  /** YYYY-MM-DD, in the game's time zone */
   date: string
-  /** Kaçıncı günlük bulmaca */
+  /** Which daily puzzle number this is */
   number: number
-  /** Hedef hamle sayısı — havuz grafındaki en kısa yol */
+  /** Par — the shortest path in the pool graph */
   par: number
-  /** Yeni bulmacaya kalan saniye */
+  /** Seconds until the next puzzle */
   next_in_seconds: number
 }
 
@@ -60,14 +60,14 @@ export interface SolutionStep {
   media: MediaBrief
 }
 
-/** Pes edildiğinde gösterilen örnek çözüm */
+/** Example solution shown when the player gives up */
 export interface SolutionResponse {
   start: MediaBrief
   steps: SolutionStep[]
   hops: number
 }
 
-/** Çoktan seçmeli "oyunculardan yapımı bul" turu */
+/** Multiple-choice "guess the title from the cast" round */
 export interface MCQRoundResponse {
   options: MediaBrief[]
   answer: MediaBrief

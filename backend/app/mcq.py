@@ -1,9 +1,9 @@
-"""Çoktan seçmeli "oyunculardan yapımı bul" turu.
+"""Multiple-choice "guess the title from the cast" round.
 
-`pool_graph`'ın aksine bağlanabilirlik gerekmiyor, o yüzden ona hiç
-dokunmuyoruz — tüm havuzun kadrosunu önceden çekmeye zorlardı. Bunun yerine
-doğrudan `media_pool` (önbellekli havuz) ve `lookups.get_media_cast`
-(önbellekli, billing sırasına göre sıralı kadro) üstüne kuruluyor.
+Unlike `pool_graph`, this needs no connectivity, so we don't touch it at all —
+it would force fetching the whole pool's cast up front. Instead it's built
+directly on `media_pool` (the cached pool) and `lookups.get_media_cast`
+(cached cast, sorted by billing order).
 """
 
 import random
@@ -16,12 +16,12 @@ from .schemas import CastMember, MediaBrief
 OPTION_COUNT = 4
 DISTRACTOR_COUNT = OPTION_COUNT - 1
 
-# 4 seçenekte en fazla 3 yanlış tahmin olabilir: 1 başlangıç + en fazla 3 ek
-# açılış = 4 toplam. Bir 5. açılış hiçbir zaman tetiklenmez, o yüzden eşik de
-# burada tutuluyor.
+# With 4 options there can be at most 3 wrong guesses: 1 initial + at most 3
+# extra reveals = 4 total. A 5th reveal can never trigger, so the cap lives
+# here too.
 CAST_REVEAL_COUNT = 4
 
-# Yetersiz fotoğraflı kadrosu olan bir yapım gelirse tekrar deneme sınırı.
+# Retry limit for when a title's cast has too few photos.
 MAX_PICK_ATTEMPTS = 8
 
 
@@ -33,8 +33,8 @@ class MCQRound:
 
 
 def _photographed_cast(cast: list[CastMember]) -> list[CastMember]:
-    """Billing sırası korunur — TMDb düşük billing'li oyuncularda sık sık
-    profile_path döndürmüyor, bunlar ipucu olarak kullanılamaz."""
+    """Billing order is preserved — TMDb often returns no profile_path for
+    low-billed actors, and those can't be used as clues."""
     return [member for member in cast if member.profile_path is not None]
 
 

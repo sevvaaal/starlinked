@@ -1,7 +1,7 @@
 /**
- * Rozet/başarım kataloğu — hiçbir "kazanılan rozet" listesi ayrıca saklanmıyor.
- * Her açılış, stats.ts/daily.ts'teki ham geçmişten anlık hesaplanır: veri
- * kaynağıyla asla çelişmez, "istatistikleri sıfırla" otomatik olarak da sıfırlar.
+ * Badge/achievement catalog — no separate "earned badges" list is stored.
+ * Every unlock is computed on the fly from the raw history in stats.ts/daily.ts,
+ * so it never disagrees with the source data, and "reset stats" resets badges too.
  */
 
 import type { GameRecord } from './stats'
@@ -44,107 +44,107 @@ interface BadgeDef extends Badge {
 
 const CATALOG: BadgeDef[] = [
   {
-    id: 'ilk-baglanti',
-    title: 'İlk Bağlantı',
-    description: 'İlk zincirini tamamladın.',
+    id: 'first-link',
+    title: 'First Link',
+    description: 'Completed your first chain.',
     icon: '🔗',
     tone: 'pink',
     isUnlocked: (d) => d.totalWins >= 1,
   },
   {
-    id: 'efsane-hamle',
-    title: 'Efsane Hamle',
-    description: '2 hamle ya da daha azda hedefe ulaştın.',
+    id: 'legendary-move',
+    title: 'Legendary Move',
+    description: 'Reached the target in 2 moves or fewer.',
     icon: '🌟',
     tone: 'yellow',
     isUnlocked: (d) => d.records.some((r) => r.moves <= 2),
   },
   {
-    id: 'simsek',
-    title: 'Şimşek Gibi',
-    description: '30 saniyeden kısa sürede kazandın.',
+    id: 'lightning',
+    title: 'Lightning Fast',
+    description: 'Won in under 30 seconds.',
     icon: '⚡',
     tone: 'yellow',
     isUnlocked: (d) => d.records.some((r) => r.seconds <= 30),
   },
   {
-    id: 'bes-zafer',
-    title: 'Bağlantı Çırağı',
-    description: '5 oyun tamamladın.',
+    id: 'five-wins',
+    title: 'Link Apprentice',
+    description: 'Completed 5 games.',
     icon: '🥉',
     tone: 'mint',
     isUnlocked: (d) => d.totalWins >= 5,
   },
   {
-    id: 'yirmibes-zafer',
-    title: 'Bağlantı Ustası',
-    description: '25 oyun tamamladın.',
+    id: 'twenty-five-wins',
+    title: 'Link Master',
+    description: 'Completed 25 games.',
     icon: '🥈',
     tone: 'mint',
     isUnlocked: (d) => d.totalWins >= 25,
   },
   {
-    id: 'yuz-zafer',
-    title: 'Bağlantı Efsanesi',
-    description: '100 oyun tamamladın.',
+    id: 'hundred-wins',
+    title: 'Link Legend',
+    description: 'Completed 100 games.',
     icon: '🥇',
     tone: 'pink',
     isUnlocked: (d) => d.totalWins >= 100,
   },
   {
-    id: 'uc-gunluk-seri',
-    title: 'Alışkanlık',
-    description: 'Günlük bulmacada 3 gün üst üste oynadın.',
+    id: 'three-day-streak',
+    title: 'Habit Forming',
+    description: 'Played the daily puzzle 3 days in a row.',
     icon: '🔥',
     tone: 'mint',
     isUnlocked: (d) => d.bestStreak >= 3,
   },
   {
-    id: 'yedi-gunluk-seri',
-    title: 'Bir Haftalık Seri',
-    description: '7 gün üst üste günlük bulmacayı çözdün.',
+    id: 'seven-day-streak',
+    title: 'Week-Long Streak',
+    description: 'Solved the daily puzzle 7 days in a row.',
     icon: '🔥',
     tone: 'mint',
     isUnlocked: (d) => d.bestStreak >= 7,
   },
   {
-    id: 'otuz-gunluk-seri',
-    title: 'Aylık Şampiyon',
-    description: '30 gün üst üste günlük bulmacayı çözdün.',
+    id: 'thirty-day-streak',
+    title: 'Monthly Champion',
+    description: 'Solved the daily puzzle 30 days in a row.',
     icon: '🔥',
     tone: 'pink',
     isUnlocked: (d) => d.bestStreak >= 30,
   },
   {
-    id: 'kusursuz-besli',
-    title: 'Kusursuz Beşli',
-    description: '5 günlük bulmacayı hedef hamlede ya da altında çözdün.',
+    id: 'perfect-five',
+    title: 'Perfect Five',
+    description: 'Solved 5 daily puzzles at or under par.',
     icon: '⭐',
     tone: 'yellow',
     isUnlocked: (d) => d.perfectDays >= 5,
   },
   {
-    id: 'en-kisa-yol',
-    title: 'En Kısa Yolu Buldun',
-    description: 'Bir zinciri mümkün olan en kısa hamlede tamamladın.',
+    id: 'shortest-path',
+    title: 'Shortest Path',
+    description: 'Completed a chain in the fewest possible moves.',
     icon: '🧭',
     tone: 'lilac',
     isUnlocked: (d) => d.records.some((r) => r.optimal === true),
   },
   {
-    id: 'yonetmen-koprusu',
-    title: 'Yönetmen Köprüsü',
-    description: 'Zincirinde bir yönetmeni bağlantı olarak kullandın.',
+    id: 'director-bridge',
+    title: 'Director Bridge',
+    description: 'Used a director as a link in your chain.',
     icon: '🎬',
     tone: 'lilac',
     isUnlocked: (d) => d.records.some((r) => r.usedDirector === true),
   },
 ]
 
-/** Tüm katalog — sırayla, kilitli/açık ayrımı yapılmadan. Galeri bunu render eder. */
+/** The whole catalog, in order, locked or not. The gallery renders this. */
 export const BADGES: Badge[] = CATALOG.map(({ isUnlocked: _isUnlocked, ...badge }) => badge)
 
-/** Şu an açık olan rozetler — her çağrıda ham veriden yeniden hesaplanır. */
+/** Currently unlocked badges — recomputed from raw data on every call. */
 export function evaluateUnlockedBadges(): Badge[] {
   const data = collect()
   return CATALOG.filter((badge) => badge.isUnlocked(data)).map(

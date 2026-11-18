@@ -1,17 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
 /* ==========================================================================
-   Design tokens — "sticker / retro OS" dili, sakin sürüm
+   Design tokens — "sticker / retro OS" style, calm version
 
-   Kontrast bütçesi: aynı anda tek şey bağırır. Zemin soluk, paneller krem,
-   aksanlar pastel; asıl renk film afişlerinden gelir. Kontur saf siyah değil
-   yumuşak lacivert. Pembe = başlangıç, mint = hedef.
+   Contrast budget: only one thing shouts at a time. Faded background, cream
+   panels, pastel accents; the real color comes from the posters. Outlines are
+   soft navy rather than pure black. Pink = start, mint = target.
    ========================================================================== */
 
 :root {
   color-scheme: light;
 
-  /* Zemin ve yüzeyler — akşam/gece tonu, ama neon değil: doygunluğu düşük */
+  /* Background and surfaces — evening/night tone, but not neon: low saturation */
   --field: #383c60;
   --field-hi: #464b78;
   --field-deep: #262841;
@@ -20,16 +20,16 @@
   --paper-2: #efe8da;
   --paper-3: #e0d8c7;
 
-  /* Mürekkep — panel içi metin. Panellerin zemini hep krem kaldığı için sabit. */
+  /* Ink — text inside panels. Fixed, since panel backgrounds always stay cream. */
   --ink: #2e2b3f;
   --ink-soft: #5f5b75;
   --ink-dim: #918da5;
 
-  /* Zemin üstü metin — panel olmayan, doğrudan koyu fonun üstündeki yazılar */
+  /* On-background text — text sitting directly on the dark backdrop, not in a panel */
   --on-field: var(--paper);
   --on-field-soft: #b6b3d0;
 
-  /* Aksanlar — pastel, doygunluk düşük */
+  /* Accents — pastel, low saturation */
   --pink: #f3a4c6;
   --pink-deep: #e58ab2;
   --mint: #b7da9e;
@@ -38,7 +38,7 @@
   --lilac: #cac5ee;
   --danger: #ec9c9c;
 
-  /* Form dili — kontur inceldi, gölge kısaldı */
+  /* Shape language — thinner outlines, shorter shadows */
   --bw: 2px;
   --bd: var(--bw) solid var(--ink);
   --sh: 4px 4px 0 var(--ink);
@@ -51,7 +51,7 @@
   --r-xl: 24px;
   --r-pill: 999px;
 
-  /* Hareket — kısa ve tok, yaylanma yok */
+  /* Motion — short and firm, no bounce */
   --ease: cubic-bezier(0.2, 0.8, 0.3, 1);
   --fast: 0.12s;
   --med: 0.2s;
@@ -82,7 +82,7 @@ body {
   min-height: 100svh;
   color: var(--ink);
   background-color: var(--field);
-  /* Yumuşak gökyüzü geçişi + ince ızgara — ikisi de atmosfer, vurgu değil */
+  /* Soft sky gradient + fine grid — both are atmosphere, not emphasis */
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px),
@@ -143,7 +143,7 @@ table {
   border-collapse: collapse;
 }
 
-/* Klavye odağı — sarı, kalın, kaçırılmaz */
+/* Keyboard focus — yellow, thick, impossible to miss */
 :focus-visible {
   outline: 3px solid var(--yellow);
   outline-offset: 3px;
@@ -161,7 +161,7 @@ table {
   }
 }
 
-/* Kaydırma çubukları da aynı dilde */
+/* Scrollbars in the same style */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--ink) transparent;

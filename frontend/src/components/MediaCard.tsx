@@ -5,7 +5,7 @@ interface MediaCardProps {
   media: MediaBrief
   label?: string
   size?: 'lg' | 'sm'
-  /** Rol rengi: başlangıç pembe, hedef mint, ara adımlar nötr. */
+  /** Role color: start is pink, target is mint, steps in between are neutral. */
   tone?: 'pink' | 'mint' | 'neutral'
 }
 
@@ -31,7 +31,7 @@ export default function MediaCard({
           </div>
         )}
         <span className={`type-badge type-badge--${media.media_type}`}>
-          {media.media_type === 'movie' ? 'Film' : 'Dizi'}
+          {media.media_type === 'movie' ? 'Movie' : 'TV'}
         </span>
       </div>
       <p className="media-card-title">{media.title}</p>

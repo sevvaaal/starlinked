@@ -1,27 +1,28 @@
-# Dizilink
+# Starlinked
 
-"Filmlink" bağlantı oyununun film+dizi versiyonu. Bir başlangıç ve bir hedef film/dizi verilir; ortak oyuncular üzerinden zincir kurarak (Film/Dizi A → o yapımda oynayan bir oyuncu → oyuncunun oynadığı başka bir yapım B → ...) hedefe ulaşmaya çalışırsın.
+A movie + TV connection game. You get a starting title and a target title, and you try to reach the target by building a chain through shared cast members (Title A → an actor who appeared in it → another title that actor was in, B → ...).
 
-- **Backend**: Python + FastAPI, TMDb (The Movie Database) API'sine proxy
+- **Backend**: Python + FastAPI, a proxy for the TMDb (The Movie Database) API
 - **Frontend**: React + TypeScript (Vite)
 
-## Kurulum
+## Setup
 
-### 1. TMDb API key al
+### 1. Get a TMDb API key
 
-[themoviedb.org](https://www.themoviedb.org/) üzerinde ücretsiz bir hesap oluştur, ayarlardan bir **API key (v3 auth)** al.
+Create a free account on [themoviedb.org](https://www.themoviedb.org/) and get an **API key (v3 auth)** from the settings.
 
 ### 2. Backend
 
 ```bash
 cd backend
 python -m venv venv
-./venv/Scripts/Activate.ps1   # Windows PowerShell
+source venv/bin/activate        # macOS / Linux
+# ./venv/Scripts/Activate.ps1   # Windows PowerShell
 pip install -r requirements.txt
 cp .env.example .env
 ```
 
-`.env` dosyasını aç, `TMDB_API_KEY` değerini kendi TMDb key'inle değiştir. Sonra çalıştır:
+Open `.env` and replace `TMDB_API_KEY` with your own TMDb key. Then run:
 
 ```bash
 uvicorn app.main:app --reload --port 8000
@@ -29,7 +30,7 @@ uvicorn app.main:app --reload --port 8000
 
 Swagger UI: http://localhost:8000/docs
 
-### 3. Frontend (yeni bir terminalde)
+### 3. Frontend (in a new terminal)
 
 ```bash
 cd frontend
@@ -38,16 +39,17 @@ cp .env.example .env.local
 npm run dev
 ```
 
-http://localhost:5173 adresini aç.
+Open http://localhost:5173.
 
-## Nasıl oynanır
+## How to play
 
-1. "Oyuna Başla" ile rastgele bir başlangıç/hedef çifti gelir.
-2. Gösterilen kadrodan bir oyuncu seç.
-3. O oyuncunun oynadığı başka bir film/dizi seç (zincire eklenir).
-4. Hedefe ulaşana kadar tekrarla — daha az adım daha iyi skor demektir.
+1. Press "Start Game" to get a random start/target pair.
+2. Pick an actor from the cast shown.
+3. Pick another movie or TV show that actor appeared in (it's added to your chain).
+4. Repeat until you reach the target — fewer moves means a better score.
 
-## Bilinen sınırlamalar / gelecek geliştirmeler
+There's also a **daily puzzle** (the same matchup for everyone, one try per day) and a **Guess from the Cast** mini game.
 
-- Rastgele seçilen başlangıç/hedef çiftinin her zaman bir zincirle bağlanabilir olduğu garanti edilmiyor (v1'de graph/BFS çözülebilirlik ön-kontrolü yok).
-- Zincir adımları sadece istemci tarafında doğrulanıyor (skor/liderlik tablosu gibi bir özellik eklenirse `POST /api/validate-step` gibi bir sunucu taraflı doğrulama eklenmeli).
+## Known limitations / future work
+
+- Free-play chain steps are only validated on the client. If something like a scoreboard or leaderboard is added, a server-side check such as `POST /api/validate-step` should be added too.

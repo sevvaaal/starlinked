@@ -20,6 +20,8 @@ GAME_TZ = timezone(timedelta(hours=3))
 # Puzzle #1. Only affects the number shown to players.
 EPOCH = date(2026, 1, 1)
 
+# Kept from the project's old name (Dizilink) on purpose: changing it would
+# reshuffle every daily puzzle, including ones players already solved.
 SEED_PREFIX = "dizilink-daily"
 
 # Today's pair, kept for the whole day: {iso_date: (start, target, par)}.

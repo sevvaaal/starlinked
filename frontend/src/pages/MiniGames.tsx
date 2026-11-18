@@ -9,9 +9,9 @@ interface MiniGame {
 
 const MINI_GAMES: MiniGame[] = [
   {
-    to: '/mini-oyunlar/oyunculardan-film-bul',
-    title: 'Oyunculardan Film Bul',
-    description: 'Kadro fotoğraflarına bakıp 4 seçenekten doğru yapımı bul. Az ipucuyla bulmak daha yüksek skor kazandırır.',
+    to: '/mini-games/guess-from-cast',
+    title: 'Guess from the Cast',
+    description: 'Look at the cast photos and pick the right title out of 4 options. Fewer clues means a higher score.',
     emoji: '🎭',
   },
 ]
@@ -20,10 +20,10 @@ export default function MiniGames() {
   return (
     <div className="page page--doc">
       <header className="page-head">
-        <span className="page-eyebrow">Mini Oyunlar</span>
-        <h1 className="page-title">Kısa molalar için</h1>
+        <span className="page-eyebrow">Mini Games</span>
+        <h1 className="page-title">For quick breaks</h1>
         <p className="page-lead">
-          Ana oyundan farklı, hızlı oynanan küçük bulmacalar. Zamanla yenileri eklenecek.
+          Small, quick puzzles that play differently from the main game. More are coming over time.
         </p>
       </header>
 
