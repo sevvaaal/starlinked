@@ -18,6 +18,8 @@ export interface GameRecord {
   optimal?: boolean
   /** Whether at least one director link was used in the chain */
   usedDirector?: boolean
+  /** Hints used during the game — a hinted game can't count as optimal or perfect */
+  hints?: number
 }
 
 interface StatsData {

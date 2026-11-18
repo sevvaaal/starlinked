@@ -5,6 +5,7 @@ import GameBoard from '../components/GameBoard'
 import WinBanner from '../components/WinBanner'
 import GiveUpBanner from '../components/GiveUpBanner'
 import ResultModal from '../components/ResultModal'
+import HintButton from '../components/HintButton'
 import { formatDuration } from '../stats'
 
 const DURATION_OPTIONS: { value: number | null; label: string }[] = [
@@ -28,6 +29,9 @@ export default function Play() {
     timeLeft,
     solution,
     newlyUnlockedBadges,
+    excludeAnimation,
+    setExcludeAnimation,
+    hintsUsed,
     startNewGame,
     resetToSetup,
     giveUp,
@@ -92,6 +96,17 @@ export default function Play() {
                 </button>
               ))}
             </div>
+            <label className="setup-toggle">
+              <input
+                type="checkbox"
+                checked={excludeAnimation}
+                onChange={(event) => setExcludeAnimation(event.target.checked)}
+              />
+              <span>
+                <strong>Skip animated titles</strong>
+                <small>Voice casts are hard to know — leaves out animated movies and shows.</small>
+              </span>
+            </label>
             <button className="btn-primary btn-lg" onClick={() => startNewGame()}>
               Start game
             </button>
@@ -120,6 +135,7 @@ export default function Play() {
           </div>
 
           <div className="hud-actions">
+            <HintButton />
             <button className="btn-ghost" onClick={giveUp} title="End the game and see the solution">
               Give up
             </button>
@@ -145,6 +161,7 @@ export default function Play() {
           moves={moves}
           seconds={elapsed}
           solution={solution}
+          hints={hintsUsed}
           onPlayAgain={() => startNewGame()}
         />
       )}
@@ -170,6 +187,7 @@ export default function Play() {
           seconds={elapsed}
           solution={solution}
           newBadges={newlyUnlockedBadges}
+          hints={hintsUsed}
           start={game.start}
           target={game.target}
           onClose={() => setTicketOpen(false)}

@@ -37,12 +37,17 @@ class CastMember(BaseModel):
     order: int
     profile_path: str | None = None
     is_director: bool = False
+    episode_count: int | None = None
+    """Series only: episodes this person appeared in across the whole run."""
 
 
 class MediaCastResponse(BaseModel):
     media_type: MediaType
     media_id: int
     cast: list[CastMember]
+    """The main cast — what the picker shows first and what the pool graph links on."""
+    more_cast: list[CastMember] = []
+    """Everyone else worth finding by search (recurring and guest players)."""
     directors: list[CastMember] = []
 
 
@@ -55,6 +60,7 @@ class CreditItem(BaseModel):
     poster_path: str | None = None
     release_date: str | None = None
     vote_average: float | None = None
+    is_animation: bool = False
 
 
 class ActorCreditsResponse(BaseModel):

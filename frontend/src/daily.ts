@@ -25,6 +25,8 @@ export interface DailyResult {
   optimal?: boolean
   /** Whether at least one director link was used in the chain */
   usedDirector?: boolean
+  /** Hints used during the game — a hinted game can't count as optimal or perfect */
+  hints?: number
 }
 
 function read(): DailyResult[] {
@@ -52,6 +54,11 @@ function write(results: DailyResult[]): void {
  */
 export function puzzleDateNow(): string {
   return new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10)
+}
+
+/** Matched or beat par without using any hints. */
+export function isPerfectDay(result: Pick<DailyResult, 'moves' | 'par' | 'hints'>): boolean {
+  return result.moves <= result.par && !result.hints
 }
 
 export function getDailyResult(date: string): DailyResult | null {
@@ -152,7 +159,7 @@ export function getDailyStats(today: string): DailyStats {
     played: results.length,
     currentStreak,
     bestStreak,
-    perfect: results.filter((r) => r.moves <= r.par).length,
+    perfect: results.filter(isPerfectDay).length,
     bestMoves: Math.min(...moves),
     averageMoves: Math.round((moves.reduce((a, b) => a + b, 0) / results.length) * 10) / 10,
     recent: [...results].reverse().slice(0, 10),
@@ -167,14 +174,15 @@ function formatClock(totalSeconds: number): string {
 
 /** Share text — no spoilers, no titles mentioned. */
 export function buildShareText(result: DailyResult, url: string): string {
-  const perfect = result.moves <= result.par
+  const perfect = isPerfectDay(result)
   const rail = `🎬${'🔗'.repeat(Math.min(result.moves, 12))}🎯`
   const parNote = perfect ? ' ⭐' : ` (par ${result.par})`
+  const hintNote = result.hints ? ` · 💡 ${result.hints}` : ''
 
   return [
     `starlinked · Daily #${result.number}`,
     rail,
-    `${result.moves} ${result.moves === 1 ? 'move' : 'moves'}${parNote} · ⏱ ${formatClock(result.seconds)}`,
+    `${result.moves} ${result.moves === 1 ? 'move' : 'moves'}${parNote}${hintNote} · ⏱ ${formatClock(result.seconds)}`,
     url,
   ].join('\n')
 }

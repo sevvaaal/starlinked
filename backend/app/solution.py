@@ -24,9 +24,12 @@ async def _actor_linking(graph: PoolGraph, first: MediaKey, second: MediaKey) ->
 
 
 async def build_solution(
-    graph: PoolGraph, start: MediaKey, target: MediaKey
+    graph: PoolGraph,
+    start: MediaKey,
+    target: MediaKey,
+    excluded: frozenset[MediaKey] = frozenset(),
 ) -> SolutionResponse | None:
-    path = graph.shortest_path(start, target)
+    path = graph.shortest_path(start, target, excluded)
     if path is None or len(path) < 2:
         return None
 

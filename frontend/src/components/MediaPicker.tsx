@@ -7,7 +7,11 @@ interface MediaPickerProps {
   credits: CreditItem[]
   actorName: string
   isDirector?: boolean
+  /** `${media_type}:${id}` of the title the current hint points to */
+  hintKey?: string | null
   onSelect: (credit: CreditItem) => void
+  /** Go back to the cast without making a move */
+  onBack: () => void
 }
 
 type SortMode = 'rating' | 'newest' | 'oldest'
@@ -30,7 +34,14 @@ function sortCredits(list: CreditItem[], mode: SortMode): CreditItem[] {
   return sorted
 }
 
-export default function MediaPicker({ credits, actorName, isDirector = false, onSelect }: MediaPickerProps) {
+export default function MediaPicker({
+  credits,
+  actorName,
+  isDirector = false,
+  hintKey = null,
+  onSelect,
+  onBack,
+}: MediaPickerProps) {
   const [query, setQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('rating')
 
@@ -44,6 +55,8 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
       ),
     [credits, query, sortMode],
   )
+  const hinted = filtered.find((credit) => `${credit.media_type}:${credit.media_id}` === hintKey)
+  const ordered = hinted ? [hinted, ...filtered.filter((credit) => credit !== hinted)] : filtered
 
   return (
     <section className="picker window--mint">
@@ -58,6 +71,9 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
 
       <div className="picker-body">
         <div className="picker-head">
+          <button className="btn-ghost btn-ghost--quiet picker-back" onClick={onBack}>
+            ← Back to cast
+          </button>
           <span className="step-badge step-badge--mint">Step 2</span>
           <h2>
             {isDirector ? 'What else did ' : 'What else was '}
@@ -94,7 +110,7 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {ordered.length === 0 ? (
           <EmptyState
             hasQuery={query.length > 0}
             onClear={() => setQuery('')}
@@ -102,13 +118,14 @@ export default function MediaPicker({ credits, actorName, isDirector = false, on
           />
         ) : (
           <div className="card-grid">
-            {filtered.map((credit) => (
+            {ordered.map((credit) => (
               <button
                 key={`${credit.media_type}:${credit.media_id}`}
-                className="pick-card"
+                className={`pick-card${credit === hinted ? ' pick-card--hint' : ''}`}
                 onClick={() => onSelect(credit)}
               >
                 <div className="pick-card-poster">
+                  {credit === hinted && <span className="hint-badge">💡 Hint</span>}
                   {credit.poster_path ? (
                     <img src={posterUrl(credit.poster_path)} alt="" loading="lazy" />
                   ) : (

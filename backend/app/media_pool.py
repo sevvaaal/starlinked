@@ -18,6 +18,7 @@ async def _fetch_movie_pool(settings: Settings) -> list[dict]:
                     "media_type": "movie",
                     "title": item["title"],
                     "poster_path": item.get("poster_path"),
+                    "is_animation": filters.is_animation(item.get("genre_ids")),
                 }
             )
     return items
@@ -40,6 +41,7 @@ async def _fetch_tv_pool(settings: Settings) -> list[dict]:
                     "media_type": "tv",
                     "title": item["name"],
                     "poster_path": item.get("poster_path"),
+                    "is_animation": filters.is_animation(item.get("genre_ids")),
                 }
             )
     return items

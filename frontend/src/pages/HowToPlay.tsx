@@ -33,6 +33,18 @@ const TIPS = [
     body: 'If the target is a Turkish or Korean series, go through actors from that country. If it\'s a Marvel movie, even supporting characters can get you there.',
   },
   {
+    title: 'Search the full cast',
+    body: 'Series show their regulars first, sorted by episode count. Searching looks through the whole cast — guest stars included — and "Show full cast" lists everyone.',
+  },
+  {
+    title: 'Ask for a hint',
+    body: 'The 💡 Hint button marks the actor to pick next on the shortest path, then the title to jump to. Each hint is noted on your result, and a hinted game can\'t count as perfect.',
+  },
+  {
+    title: 'Skip animation',
+    body: 'Don\'t know voice actors? Turn on "Skip animated titles" before a free-play game and animated movies and shows are left out.',
+  },
+  {
     title: 'Stuck? You can give up',
     body: '"Give up" ends the game and shows an example solution — you\'ll see which actor links which titles.',
   },

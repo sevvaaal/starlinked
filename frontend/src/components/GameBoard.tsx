@@ -21,14 +21,26 @@ export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
     chain,
     currentMedia,
     cast,
+    moreCast,
     directors,
     credits,
     selectedActor,
     status,
     error,
+    hint,
+    hintStatus,
     selectActor,
     selectMedia,
+    backToCast,
   } = useGame()
+
+  // A hint only applies to the title it was computed from.
+  const activeHint =
+    hint && currentMedia && hint.fromKey === `${currentMedia.media_type}:${currentMedia.id}` ? hint : null
+  const hintMediaKey =
+    activeHint && selectedActor?.person_id === activeHint.actor.person_id
+      ? `${activeHint.media.media_type}:${activeHint.media.id}`
+      : null
 
   return (
     <>
@@ -51,13 +63,23 @@ export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
         <ChainDisplay chain={chain} />
       )}
 
+      {hintStatus === 'unavailable' && (status === 'picking-actor' || status === 'picking-media') && (
+        <p className="hint-note" role="status">
+          💡 No hint from here — this title isn't linked to the target in our title pool. Try a
+          different path, or give up to see a solution.
+        </p>
+      )}
+
       {status === 'loading' && game && <SkeletonGrid />}
 
       {status === 'picking-actor' && currentMedia && (
         <ActorPicker
+          key={`${currentMedia.media_type}:${currentMedia.id}`}
           cast={cast}
+          moreCast={moreCast}
           directors={directors}
           currentTitle={currentMedia.title}
+          hintActorId={activeHint?.actor.person_id ?? null}
           onSelect={selectActor}
         />
       )}
@@ -67,7 +89,9 @@ export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
           credits={credits}
           actorName={selectedActor.name}
           isDirector={selectedActor.is_director}
+          hintKey={hintMediaKey}
           onSelect={selectMedia}
+          onBack={backToCast}
         />
       )}
 

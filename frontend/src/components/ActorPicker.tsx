@@ -4,16 +4,42 @@ import { profileUrl } from '../images'
 
 interface ActorPickerProps {
   cast: CastMember[]
+  /** The rest of the cast: searchable, and shown in full on request */
+  moreCast: CastMember[]
   directors: CastMember[]
   currentTitle: string
+  /** Actor the current hint points to — pulled to the front and marked */
+  hintActorId?: number | null
   onSelect: (actor: CastMember) => void
 }
 
-export default function ActorPicker({ cast, directors, currentTitle, onSelect }: ActorPickerProps) {
+function matches(member: CastMember, query: string): boolean {
+  return `${member.name} ${member.character}`.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+}
+
+function subtitle(member: CastMember): string {
+  if (!member.episode_count) return member.character
+  const episodes = `${member.episode_count} ${member.episode_count === 1 ? 'ep' : 'eps'}`
+  return member.character ? `${member.character} · ${episodes}` : episodes
+}
+
+export default function ActorPicker({
+  cast,
+  moreCast,
+  directors,
+  currentTitle,
+  hintActorId = null,
+  onSelect,
+}: ActorPickerProps) {
   const [query, setQuery] = useState('')
-  const filtered = cast.filter((member) =>
-    `${member.name} ${member.character}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
-  )
+  const [showAll, setShowAll] = useState(false)
+
+  // Searching always looks through the whole cast — the player may know a guest
+  // star who isn't in the main list. Without a search, the extra cast is opt-in.
+  const pool = query || showAll ? [...cast, ...moreCast] : cast
+  const filtered = pool.filter((member) => matches(member, query))
+  const hinted = filtered.find((member) => member.person_id === hintActorId)
+  const ordered = hinted ? [hinted, ...filtered.filter((member) => member !== hinted)] : filtered
 
   return (
     <section className="picker window--pink">
@@ -66,7 +92,7 @@ export default function ActorPicker({ cast, directors, currentTitle, onSelect }:
           </span>
           <input
             type="search"
-            placeholder="Search actors…"
+            placeholder={moreCast.length > 0 ? 'Search the full cast…' : 'Search actors…'}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             aria-label="Search actors"
@@ -74,7 +100,7 @@ export default function ActorPicker({ cast, directors, currentTitle, onSelect }:
           {query && <span className="search-count">{filtered.length}</span>}
         </div>
 
-        {filtered.length === 0 ? (
+        {ordered.length === 0 ? (
           <EmptyState
             hasQuery={query.length > 0}
             onClear={() => setQuery('')}
@@ -82,9 +108,14 @@ export default function ActorPicker({ cast, directors, currentTitle, onSelect }:
           />
         ) : (
           <div className="card-grid">
-            {filtered.map((member) => (
-              <button key={member.person_id} className="pick-card" onClick={() => onSelect(member)}>
+            {ordered.map((member) => (
+              <button
+                key={member.person_id}
+                className={`pick-card${member === hinted ? ' pick-card--hint' : ''}`}
+                onClick={() => onSelect(member)}
+              >
                 <div className="pick-card-poster">
+                  {member === hinted && <span className="hint-badge">💡 Hint</span>}
                   {member.profile_path ? (
                     <img src={profileUrl(member.profile_path, 'w185')} alt="" loading="lazy" />
                   ) : (
@@ -94,9 +125,17 @@ export default function ActorPicker({ cast, directors, currentTitle, onSelect }:
                   )}
                 </div>
                 <span className="pick-card-title">{member.name}</span>
-                <span className="pick-card-subtitle">{member.character}</span>
+                <span className="pick-card-subtitle">{subtitle(member)}</span>
               </button>
             ))}
+          </div>
+        )}
+
+        {!query && moreCast.length > 0 && (
+          <div className="show-more-row">
+            <button className="btn-ghost" onClick={() => setShowAll((value) => !value)}>
+              {showAll ? 'Show main cast only' : `Show full cast (${moreCast.length} more)`}
+            </button>
           </div>
         )}
       </div>

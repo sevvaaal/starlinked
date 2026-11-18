@@ -5,10 +5,11 @@ import GameHeader from '../components/GameHeader'
 import GameBoard from '../components/GameBoard'
 import GiveUpBanner from '../components/GiveUpBanner'
 import ChainDisplay from '../components/ChainDisplay'
+import HintButton from '../components/HintButton'
 import { getDailyGame } from '../api'
 import type { DailyGameResponse } from '../types'
 import type { DailyResult } from '../daily'
-import { buildShareText, formatCountdown, getDailyResult, getDailyStats } from '../daily'
+import { buildShareText, formatCountdown, getDailyResult, getDailyStats, isPerfectDay } from '../daily'
 import { formatDuration } from '../stats'
 
 function formatDay(date: string): string {
@@ -148,6 +149,7 @@ export default function Daily() {
           </div>
 
           <div className="hud-actions">
+            <HintButton />
             <button className="btn-ghost" onClick={giveUp} title="End today's puzzle and see the solution">
               Give up
             </button>
@@ -192,7 +194,7 @@ export default function Daily() {
         <section className="daily-result">
           <div className="win-card">
             <span className="win-rating">
-              {result.moves <= result.par ? 'Perfect' : 'Completed'}
+              {isPerfectDay(result) ? 'Perfect' : 'Completed'}
             </span>
             <h2 className="win-title">Daily #{result.number} solved</h2>
             <p className="daily-matchup">
@@ -202,6 +204,11 @@ export default function Daily() {
               </span>
               <span className="record-target">{result.targetTitle}</span>
             </p>
+            {result.hints ? (
+              <p className="win-optimal-note">
+                💡 Solved with {result.hints} {result.hints === 1 ? 'hint' : 'hints'}
+              </p>
+            ) : null}
 
             <div className="win-stats">
               <div className="win-stat">

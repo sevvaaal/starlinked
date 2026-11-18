@@ -18,14 +18,14 @@ router = APIRouter()
 
 
 @router.get("/new-game", response_model=NewGameResponse)
-async def new_game():
+async def new_game(exclude_animation: bool = False):
     settings = get_settings()
     try:
         graph = await pool_graph.get_pool_graph(settings)
     except tmdb_client.TMDbError as exc:
         raise HTTPException(502, "TMDb request failed") from exc
 
-    pair = pool_graph.pick_connectable_pair(graph)
+    pair = pool_graph.pick_connectable_pair(graph, exclude_animation)
     if pair is None:
         raise HTTPException(502, "Could not build a solvable game from TMDb data")
 
@@ -62,13 +62,16 @@ async def game_solution(
     start_id: int,
     target_type: Literal["movie", "tv"],
     target_id: int,
+    exclude_animation: bool = False,
 ):
-    """A worked answer for a matchup — served when the player gives up."""
+    """A worked answer for a matchup — served when the player gives up, and as
+    hints (called with the player's current title as the start)."""
     settings = get_settings()
     try:
         graph = await pool_graph.get_pool_graph(settings)
+        excluded = graph.animated_keys if exclude_animation else frozenset()
         answer = await solution.build_solution(
-            graph, (start_type, start_id), (target_type, target_id)
+            graph, (start_type, start_id), (target_type, target_id), excluded
         )
     except tmdb_client.TMDbError as exc:
         raise HTTPException(502, "TMDb request failed") from exc

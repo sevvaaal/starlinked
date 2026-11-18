@@ -11,6 +11,7 @@ trivial. Two complementary rules catch these:
   featurettes and documentaries that no genre filter would.
 """
 
+GENRE_ANIMATION = 16  # same id for movies and series
 TV_GENRE_DOCUMENTARY = 99
 TV_GENRE_NEWS = 10763
 TV_GENRE_REALITY = 10764
@@ -32,6 +33,11 @@ _SELF_MARKERS = frozenset({"self", "himself", "herself", "themselves"})
 # "Self - Guest", "Herself / Narrator", "Self (archive footage)" all reduce to
 # the part before the first of these.
 _ROLE_SEPARATORS = "(-–/,"
+
+
+def is_animation(genre_ids) -> bool:
+    """Animated titles are voice-cast, so players can opt out of them."""
+    return GENRE_ANIMATION in (genre_ids or ())
 
 
 def has_excluded_genre(genre_ids) -> bool:

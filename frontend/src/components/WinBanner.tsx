@@ -8,6 +8,8 @@ interface WinBannerProps {
   seconds: number
   /** Fetched in the background; null until it arrives. */
   solution: SolutionResponse | null
+  /** Hints used — a hinted win is told apart from an unaided one */
+  hints?: number
   onPlayAgain: () => void
 }
 
@@ -18,7 +20,14 @@ function rating(moves: number): string {
   return 'Completed'
 }
 
-export default function WinBanner({ chain, moves, seconds, solution, onPlayAgain }: WinBannerProps) {
+export default function WinBanner({
+  chain,
+  moves,
+  seconds,
+  solution,
+  hints = 0,
+  onPlayAgain,
+}: WinBannerProps) {
   const minutes = Math.floor(seconds / 60)
   const rest = seconds % 60
   const beatenByShorter = solution !== null && solution.hops < moves
@@ -44,6 +53,12 @@ export default function WinBanner({ chain, moves, seconds, solution, onPlayAgain
             <span className="win-stat-label">time</span>
           </div>
         </div>
+
+        {hints > 0 && (
+          <p className="win-optimal-note">
+            💡 You used {hints} {hints === 1 ? 'hint' : 'hints'} this game.
+          </p>
+        )}
 
         {solution &&
           (beatenByShorter ? (

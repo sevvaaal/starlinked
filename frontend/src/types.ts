@@ -30,12 +30,16 @@ export interface CastMember {
   order: number
   profile_path: string | null
   is_director: boolean
+  /** Series only: episodes this person appeared in across the whole run */
+  episode_count?: number | null
 }
 
 export interface MediaCastResponse {
   media_type: MediaType
   media_id: number
   cast: CastMember[]
+  /** The rest of the cast — not shown up front, but searchable */
+  more_cast: CastMember[]
   directors: CastMember[]
 }
 
@@ -48,6 +52,7 @@ export interface CreditItem {
   poster_path: string | null
   release_date: string | null
   vote_average: number | null
+  is_animation: boolean
 }
 
 export interface ActorCreditsResponse {

@@ -12,6 +12,12 @@ MOVIE_CAST_LIMIT = 20
 # connections live.
 TV_CAST_LIMIT = 45
 
+# Beyond the main cast, players can still *search* for someone they know was
+# in it (a guest star, a one-season regular). These aren't shown up front and
+# the pool graph ignores them, so they don't make puzzles trivially short.
+MOVIE_MORE_CAST_LIMIT = 60
+TV_MORE_CAST_LIMIT = 400
+
 # A film can list several credited directors (co-directed animation, anthology
 # segments); a handful is plenty to offer as connectors.
 MAX_DIRECTORS = 3
@@ -64,7 +70,7 @@ def _tv_directors(data: dict) -> list[CastMember]:
     return _dedupe_by_person(members)[:MAX_DIRECTORS]
 
 
-def _movie_cast(data: dict) -> list[CastMember]:
+def _movie_cast(data: dict) -> tuple[list[CastMember], list[CastMember]]:
     members = [
         CastMember(
             person_id=item["id"],
@@ -77,11 +83,19 @@ def _movie_cast(data: dict) -> list[CastMember]:
         if not filters.is_self_appearance(item.get("character"), item.get("name"))
     ]
     members.sort(key=lambda member: member.order)
-    return members[:MOVIE_CAST_LIMIT]
+    return (
+        members[:MOVIE_CAST_LIMIT],
+        members[MOVIE_CAST_LIMIT : MOVIE_CAST_LIMIT + MOVIE_MORE_CAST_LIMIT],
+    )
 
 
-def _tv_cast(data: dict) -> list[CastMember]:
-    """Flatten aggregate credits, where each actor carries a list of roles."""
+def _tv_cast(data: dict) -> tuple[list[CastMember], list[CastMember]]:
+    """Flatten aggregate credits, where each actor carries a list of roles.
+
+    Sorted by episodes appeared in, not TMDb's `order`: on long-running shows
+    `order` puts one-episode guests ahead of people with 20+ episodes, so the
+    recurring players everyone remembers fell off the end of the list.
+    """
     members: list[CastMember] = []
     for item in data.get("cast", []):
         roles = item.get("roles") or []
@@ -98,11 +112,12 @@ def _tv_cast(data: dict) -> list[CastMember]:
                 character=character,
                 order=item.get("order", 999),
                 profile_path=item.get("profile_path"),
+                episode_count=item.get("total_episode_count"),
             )
         )
 
-    members.sort(key=lambda member: member.order)
-    return members[:TV_CAST_LIMIT]
+    members.sort(key=lambda member: (-(member.episode_count or 0), member.order))
+    return members[:TV_CAST_LIMIT], members[TV_CAST_LIMIT : TV_CAST_LIMIT + TV_MORE_CAST_LIMIT]
 
 
 async def get_media_cast(media_type: MediaType, media_id: int) -> MediaCastResponse:
@@ -114,15 +129,19 @@ async def get_media_cast(media_type: MediaType, media_id: int) -> MediaCastRespo
 
     if media_type == "movie":
         data = await tmdb_client.get_movie_credits(media_id)
-        members = _movie_cast(data)
+        members, more = _movie_cast(data)
         directors = _movie_directors(data)
     else:
         data = await tmdb_client.get_tv_aggregate_credits(media_id)
-        members = _tv_cast(data)
+        members, more = _tv_cast(data)
         directors = _tv_directors(data)
 
     response = MediaCastResponse(
-        media_type=media_type, media_id=media_id, cast=members, directors=directors
+        media_type=media_type,
+        media_id=media_id,
+        cast=members,
+        more_cast=more,
+        directors=directors,
     )
     cast_cache.set(cache_key, response)
     return response
@@ -171,6 +190,7 @@ async def get_actor_credits(person_id: int) -> ActorCreditsResponse:
                 poster_path=item.get("poster_path"),
                 release_date=release_date,
                 vote_average=item.get("vote_average"),
+                is_animation=filters.is_animation(item.get("genre_ids")),
             )
         )
 
@@ -226,6 +246,7 @@ async def get_person_directed_credits(person_id: int) -> ActorCreditsResponse:
                 poster_path=item.get("poster_path"),
                 release_date=release_date,
                 vote_average=item.get("vote_average"),
+                is_animation=filters.is_animation(item.get("genre_ids")),
             )
         )
 

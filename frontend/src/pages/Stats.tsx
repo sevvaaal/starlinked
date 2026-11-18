@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { clearStats, formatDuration, getSummary } from '../stats'
-import { clearDaily, getDailyStats, puzzleDateNow } from '../daily'
+import { clearDaily, getDailyStats, isPerfectDay, puzzleDateNow } from '../daily'
 import { BADGES, evaluateUnlockedBadges } from '../achievements'
 
 function formatDate(timestamp: number): string {
@@ -134,7 +134,7 @@ export default function Stats() {
                       </span>
                     </td>
                     <td className="num">
-                      <span className={record.moves <= record.par ? 'record-best' : ''}>
+                      <span className={isPerfectDay(record) ? 'record-best' : ''}>
                         {record.moves}
                       </span>
                     </td>

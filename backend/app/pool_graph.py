@@ -45,16 +45,25 @@ class PoolGraph:
         self.media_to_actors = media_to_actors
         self.actor_to_media = actor_to_media
 
-    def neighbours(self, key: MediaKey) -> set[MediaKey]:
-        """Titles sharing at least one cast member with `key`."""
+    @property
+    def animated_keys(self) -> frozenset[MediaKey]:
+        """Pool titles that are animated — left out when a player opts out of them."""
+        return frozenset(key for key, item in self.media_by_key.items() if item.get("is_animation"))
+
+    def neighbours(self, key: MediaKey, excluded: frozenset[MediaKey] = frozenset()) -> set[MediaKey]:
+        """Titles sharing at least one cast member with `key`, minus `excluded`."""
         found: set[MediaKey] = set()
         for actor_id in self.media_to_actors.get(key, ()):
             found |= self.actor_to_media.get(actor_id, set())
         found.discard(key)
-        return found
+        return found - excluded
 
     def reachable_with_depth(
-        self, start: MediaKey, min_hops: int, max_hops: int
+        self,
+        start: MediaKey,
+        min_hops: int,
+        max_hops: int,
+        excluded: frozenset[MediaKey] = frozenset(),
     ) -> list[tuple[MediaKey, int]]:
         """Titles between `min_hops` and `max_hops` hops away, with their hop count.
 
@@ -68,7 +77,7 @@ class PoolGraph:
         for depth in range(1, max_hops + 1):
             next_frontier: set[MediaKey] = set()
             for key in frontier:
-                next_frontier |= self.neighbours(key) - seen
+                next_frontier |= self.neighbours(key, excluded) - seen
             if not next_frontier:
                 break
             seen |= next_frontier
@@ -82,7 +91,9 @@ class PoolGraph:
         """Titles between `min_hops` and `max_hops` hops away from `start`."""
         return [key for key, _ in self.reachable_with_depth(start, min_hops, max_hops)]
 
-    def shortest_path(self, start: MediaKey, target: MediaKey) -> list[MediaKey] | None:
+    def shortest_path(
+        self, start: MediaKey, target: MediaKey, excluded: frozenset[MediaKey] = frozenset()
+    ) -> list[MediaKey] | None:
         """The title-by-title path a perfect player would take, or None."""
         if start == target:
             return [start]
@@ -94,7 +105,7 @@ class PoolGraph:
         while frontier:
             next_frontier: list[MediaKey] = []
             for key in frontier:
-                for neighbour in self.neighbours(key):
+                for neighbour in self.neighbours(key, excluded):
                     if neighbour in seen:
                         continue
                     seen.add(neighbour)
@@ -160,18 +171,20 @@ async def get_pool_graph(settings: Settings) -> PoolGraph:
         return graph
 
 
-def pick_seeded_pair(graph: PoolGraph, rng: random.Random) -> tuple[dict, dict, int] | None:
+def pick_seeded_pair(
+    graph: PoolGraph, rng: random.Random, excluded: frozenset[MediaKey] = frozenset()
+) -> tuple[dict, dict, int] | None:
     """A start, a target reachable from it, and the shortest hop count between them.
 
     Everything is drawn from `rng` over *sorted* collections, so the same seed
     and the same pool always produce the same pair — that's what makes the
     daily puzzle identical for every player.
     """
-    keys = sorted(graph.media_by_key)
+    keys = sorted(key for key in graph.media_by_key if key not in excluded)
     rng.shuffle(keys)
 
     for start_key in keys[:START_ATTEMPTS]:
-        candidates = sorted(graph.reachable_with_depth(start_key, MIN_HOPS, MAX_HOPS))
+        candidates = sorted(graph.reachable_with_depth(start_key, MIN_HOPS, MAX_HOPS, excluded))
         if candidates:
             target_key, hops = rng.choice(candidates)
             return graph.media_by_key[start_key], graph.media_by_key[target_key], hops
@@ -179,9 +192,16 @@ def pick_seeded_pair(graph: PoolGraph, rng: random.Random) -> tuple[dict, dict, 
     return None
 
 
-def pick_connectable_pair(graph: PoolGraph) -> tuple[dict, dict] | None:
-    """A random start plus a target provably reachable from it, or None."""
-    picked = pick_seeded_pair(graph, random.Random())
+def pick_connectable_pair(
+    graph: PoolGraph, exclude_animation: bool = False
+) -> tuple[dict, dict] | None:
+    """A random start plus a target provably reachable from it, or None.
+
+    With `exclude_animation`, neither end is animated *and* the guaranteed
+    path avoids animated titles, so the game stays solvable without them.
+    """
+    excluded = graph.animated_keys if exclude_animation else frozenset()
+    picked = pick_seeded_pair(graph, random.Random(), excluded)
     if picked is None:
         return None
     start, target, _ = picked

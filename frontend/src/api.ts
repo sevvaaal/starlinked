@@ -19,7 +19,8 @@ async function request<T>(path: string): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export const getNewGame = () => request<NewGameResponse>('/api/new-game')
+export const getNewGame = (excludeAnimation = false) =>
+  request<NewGameResponse>(`/api/new-game${excludeAnimation ? '?exclude_animation=true' : ''}`)
 
 export const getDailyGame = () => request<DailyGameResponse>('/api/daily')
 
@@ -29,13 +30,14 @@ export const getMediaCast = (mediaType: MediaType, mediaId: number) =>
 export const getActorCredits = (personId: number, role: 'cast' | 'director' = 'cast') =>
   request<ActorCreditsResponse>(`/api/actor/${personId}/credits?role=${role}`)
 
-export const getSolution = (start: MediaBrief, target: MediaBrief) => {
+export const getSolution = (start: MediaBrief, target: MediaBrief, excludeAnimation = false) => {
   const query = new URLSearchParams({
     start_type: start.media_type,
     start_id: String(start.id),
     target_type: target.media_type,
     target_id: String(target.id),
   })
+  if (excludeAnimation) query.set('exclude_animation', 'true')
   return request<SolutionResponse>(`/api/solution?${query}`)
 }
 

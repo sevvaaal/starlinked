@@ -11,20 +11,28 @@ interface ResultModalProps {
   solution: SolutionResponse | null
   /** Badges newly unlocked by this win — shown only when the player wins. */
   newBadges: Badge[]
+  /** Hints used during the game */
+  hints?: number
   start: MediaBrief
   target: MediaBrief
   onClose: () => void
   onPlayAgain: () => void
 }
 
-function buildShareText(status: ResultModalProps['status'], moves: number, seconds: number): string {
+function buildShareText(
+  status: ResultModalProps['status'],
+  moves: number,
+  seconds: number,
+  hints: number,
+): string {
   const outcomeEmoji = status === 'won' ? '🎯' : '❌'
   const rail = `🎬${'🔗'.repeat(Math.min(moves, 12))}${outcomeEmoji}`
   const line =
     status === 'won'
       ? `Connected in ${moves} ${moves === 1 ? 'move' : 'moves'} · ⏱ ${formatDuration(seconds)}`
       : `${status === 'timeout' ? 'Ran out of time' : 'Gave up'} after ${moves} ${moves === 1 ? 'move' : 'moves'}`
-  return ['starlinked', rail, line, window.location.origin].join('\n')
+  const hintNote = hints > 0 ? ` · 💡 ${hints}` : ''
+  return ['starlinked', rail, `${line}${hintNote}`, window.location.origin].join('\n')
 }
 
 /** Wordle-style result ticket — a dismissible pop-up shown when the game ends. */
@@ -34,6 +42,7 @@ export default function ResultModal({
   seconds,
   solution,
   newBadges,
+  hints = 0,
   start,
   target,
   onClose,
@@ -57,7 +66,7 @@ export default function ResultModal({
   }, [onClose])
 
   async function handleShare() {
-    const text = buildShareText(status, moves, seconds)
+    const text = buildShareText(status, moves, seconds, hints)
     try {
       if (navigator.share) {
         await navigator.share({ text })
@@ -108,6 +117,12 @@ export default function ResultModal({
               <dt>Time</dt>
               <dd>{formatDuration(seconds)}</dd>
             </div>
+            {hints > 0 && (
+              <div className="ticket-info-row">
+                <dt>Hints</dt>
+                <dd>{hints}</dd>
+              </div>
+            )}
             {solution && (
               <div className="ticket-info-row">
                 <dt>Shortest</dt>
