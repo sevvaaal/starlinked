@@ -1,3 +1,5 @@
+import asyncio
+
 from . import filters, tmdb_client
 from .cache import pool_cache
 from .config import Settings
@@ -16,9 +18,15 @@ def _to_item(media_type: str, item: dict) -> dict:
 
 async def _run_query(query: Discover) -> list[dict]:
     discover = tmdb_client.discover_movie if query.media_type == "movie" else tmdb_client.discover_tv
+    # All pages at once (gather keeps page order, so the pool comes out the same).
+    pages = await asyncio.gather(
+        *(
+            discover(page=page, vote_count_gte=query.vote_count_gte, sort_by=query.sort_by)
+            for page in range(1, query.pages + 1)
+        )
+    )
     items = []
-    for page in range(1, query.pages + 1):
-        data = await discover(page=page, vote_count_gte=query.vote_count_gte, sort_by=query.sort_by)
+    for data in pages:
         for item in data.get("results", []):
             # discover/tv already excludes these genres; re-check in case a title
             # carries one alongside a scripted genre.

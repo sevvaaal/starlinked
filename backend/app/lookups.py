@@ -158,10 +158,36 @@ async def get_link_cast(media_type: MediaType, media_id: int) -> list[tuple[int,
     searchable extra players) is what pushed the server past its memory limit.
     """
     if media_type == "movie":
-        members, _ = _movie_cast(await tmdb_client.get_movie_credits(media_id))
-    else:
-        members, _ = _tv_cast(await tmdb_client.get_tv_aggregate_credits(media_id))
-    return [(member.person_id, member.popularity) for member in members]
+        return _movie_link_cast(await tmdb_client.get_movie_credits(media_id))
+    return _tv_link_cast(await tmdb_client.get_tv_aggregate_credits(media_id))
+
+
+# Lightweight twins of _movie_cast / _tv_cast for graph building: same filtering,
+# order and limit, but plain tuples and no model objects. A long-running series
+# lists thousands of people, and building a full CastMember for each was most of
+# the time a graph build spent (on a small server, CPU is the bottleneck).
+def _movie_link_cast(data: dict) -> list[tuple[int, float | None]]:
+    rows = [
+        (item.get("order", 999), item["id"], item.get("popularity"))
+        for item in data.get("cast", [])
+        if not filters.is_self_appearance(item.get("character"), item.get("name"))
+    ]
+    rows.sort(key=lambda row: row[0])
+    return [(person_id, popularity) for _, person_id, popularity in rows[:MOVIE_CAST_LIMIT]]
+
+
+def _tv_link_cast(data: dict) -> list[tuple[int, float | None]]:
+    rows = []
+    for item in data.get("cast", []):
+        roles = item.get("roles") or []
+        main_role = max(roles, key=lambda role: role.get("episode_count", 0), default=None)
+        character = main_role.get("character", "") if main_role else ""
+        if filters.is_self_appearance(character, item.get("name")):
+            continue
+        episodes = item.get("total_episode_count") or 0
+        rows.append((-episodes, item.get("order", 999), item["id"], item.get("popularity")))
+    rows.sort(key=lambda row: (row[0], row[1]))
+    return [(person_id, popularity) for _, _, person_id, popularity in rows[:TV_CAST_LIMIT]]
 
 
 async def get_actor_credits(person_id: int) -> ActorCreditsResponse:

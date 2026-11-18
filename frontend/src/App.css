@@ -504,6 +504,19 @@
   .hero-star--5 {
     display: none;
   }
+
+  /* Up in the corners above the "Movie & TV connection game" pill */
+  .hero-star--1 {
+    top: -18px;
+    left: 0;
+    width: 22px;
+  }
+
+  .hero-star--2 {
+    top: -22px;
+    right: 0;
+    width: 26px;
+  }
 }
 
 .hero-eyebrow,
@@ -3508,9 +3521,10 @@
    Phone fixes: start/target cards and the result ticket
    ========================================================================== */
 
-/* Long titles shouldn't push a card wider than its column */
+/* Long titles shouldn't push a card wider than its column (only words that
+   can't fit on their own get broken) */
 .media-card-title {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Pop-ups taller than the screen (the stacked ticket on phones) used to be cut
@@ -3543,12 +3557,19 @@
     width: 100%;
   }
 
+  /* Just the dots between the cards: the "connect" label took the room
+     the posters need */
   .matchup-link {
     padding-top: 0;
   }
 
   .matchup-count {
-    font-size: 11px;
+    display: none;
+  }
+
+  .matchup .media-card-label {
+    font-size: 10px;
+    padding-inline: 10px;
   }
 
   /* Result ticket: a little more room on the sides, and shrinkable posters */
