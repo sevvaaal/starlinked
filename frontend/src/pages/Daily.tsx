@@ -5,7 +5,7 @@ import GameHeader from '../components/GameHeader'
 import GameBoard from '../components/GameBoard'
 import GiveUpBanner from '../components/GiveUpBanner'
 import ChainDisplay from '../components/ChainDisplay'
-import HintButton from '../components/HintButton'
+import { levelInfo } from '../levels'
 import { getDailyGame } from '../api'
 import type { DailyGameResponse } from '../types'
 import type { DailyResult } from '../daily'
@@ -120,6 +120,11 @@ export default function Daily() {
         <span className="daily-badge">
           Daily <strong>#{info ? info.number : '—'}</strong>
         </span>
+        {info && (
+          <span className="daily-level" title="The daily puzzle's level changes every day">
+            Today's level: <strong>{levelInfo(info.level).name}</strong>
+          </span>
+        )}
         <p className="daily-date">{info ? formatDay(info.date) : 'Preparing today\'s puzzle…'}</p>
         {info && !solved && (
           <p className="daily-hint">
@@ -149,7 +154,6 @@ export default function Daily() {
           </div>
 
           <div className="hud-actions">
-            <HintButton />
             <button className="btn-ghost" onClick={giveUp} title="End today's puzzle and see the solution">
               Give up
             </button>

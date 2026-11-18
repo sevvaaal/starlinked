@@ -5,7 +5,7 @@ import GameBoard from '../components/GameBoard'
 import WinBanner from '../components/WinBanner'
 import GiveUpBanner from '../components/GiveUpBanner'
 import ResultModal from '../components/ResultModal'
-import HintButton from '../components/HintButton'
+import { LEVELS, MEDIA_MIXES, levelInfo } from '../levels'
 import { formatDuration } from '../stats'
 
 const DURATION_OPTIONS: { value: number | null; label: string }[] = [
@@ -32,6 +32,11 @@ export default function Play() {
     excludeAnimation,
     setExcludeAnimation,
     hintsUsed,
+    level,
+    setLevel,
+    gameLevel,
+    media,
+    setMedia,
     startNewGame,
     resetToSetup,
     giveUp,
@@ -79,10 +84,45 @@ export default function Play() {
             </span>
           </div>
           <div className="window-body setup-body">
-            <h2 className="setup-title">Choose a time limit</h2>
-            <p className="setup-lead">
-              Decide how many minutes you get to reach the target — or play with no limit.
-            </p>
+            <h2 className="setup-title">How cinephile are you?</h2>
+            <p className="setup-lead">This decides which movies and shows you'll get.</p>
+            <div className="level-row" role="radiogroup" aria-label="Level">
+              {LEVELS.map((option, index) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={level === option.id}
+                  className={`level-card level-card--${index + 1}${level === option.id ? ' is-active' : ''}`}
+                  onClick={() => setLevel(option.id)}
+                >
+                  <span className="level-card-dots" aria-hidden="true">
+                    {'★'.repeat(index + 1)}
+                    {'☆'.repeat(LEVELS.length - index - 1)}
+                  </span>
+                  <strong className="level-card-name">{option.name}</strong>
+                  <span className="level-card-blurb">{option.blurb}</span>
+                </button>
+              ))}
+            </div>
+
+            <h3 className="setup-subtitle">What do you want to play with?</h3>
+            <div className="duration-row" role="radiogroup" aria-label="Movies or TV shows">
+              {MEDIA_MIXES.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={media === option.id}
+                  className={`duration-btn${media === option.id ? ' is-active' : ''}`}
+                  onClick={() => setMedia(option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <h3 className="setup-subtitle">Time limit</h3>
             <div className="duration-row" role="group" aria-label="Time limit">
               {DURATION_OPTIONS.map((option) => (
                 <button
@@ -96,17 +136,21 @@ export default function Play() {
                 </button>
               ))}
             </div>
-            <label className="setup-toggle">
-              <input
-                type="checkbox"
-                checked={excludeAnimation}
-                onChange={(event) => setExcludeAnimation(event.target.checked)}
-              />
-              <span>
-                <strong>Skip animated titles</strong>
-                <small>Voice casts are hard to know — leaves out animated movies and shows.</small>
-              </span>
-            </label>
+            {level === 'casual' ? (
+              <p className="setup-note">No animated titles at this level — voice casts are hard to know.</p>
+            ) : (
+              <label className="setup-toggle">
+                <input
+                  type="checkbox"
+                  checked={excludeAnimation}
+                  onChange={(event) => setExcludeAnimation(event.target.checked)}
+                />
+                <span>
+                  <strong>Skip animated titles</strong>
+                  <small>Voice casts are hard to know — leaves out animated movies and shows.</small>
+                </span>
+              </label>
+            )}
             <button className="btn-primary btn-lg" onClick={() => startNewGame()}>
               Start game
             </button>
@@ -135,7 +179,6 @@ export default function Play() {
           </div>
 
           <div className="hud-actions">
-            <HintButton />
             <button className="btn-ghost" onClick={giveUp} title="End the game and see the solution">
               Give up
             </button>
@@ -172,9 +215,15 @@ export default function Play() {
       )}
 
       {showGame && isFinished && game && !ticketOpen && (
-        <button className="btn-ghost ticket-reopen" onClick={() => setTicketOpen(true)}>
-          View ticket again
-        </button>
+        <div className="finished-actions">
+          <button className="btn-ghost" onClick={() => setTicketOpen(true)}>
+            View ticket again
+          </button>
+          {/* Back to the setup screen to pick another level (or time limit) for the next game */}
+          <button className="btn-ghost" onClick={resetToSetup}>
+            Change level · {levelInfo(gameLevel).name}
+          </button>
+        </div>
       )}
 
       {showGame && isFinished && game && ticketOpen && (
@@ -185,6 +234,7 @@ export default function Play() {
           solution={solution}
           newBadges={newlyUnlockedBadges}
           hints={hintsUsed}
+          levelName={levelInfo(gameLevel).name}
           start={game.start}
           target={game.target}
           onClose={() => setTicketOpen(false)}

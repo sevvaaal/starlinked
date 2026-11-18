@@ -78,6 +78,7 @@ def _movie_cast(data: dict) -> tuple[list[CastMember], list[CastMember]]:
             character=item.get("character", ""),
             order=item.get("order", 999),
             profile_path=item.get("profile_path"),
+            popularity=item.get("popularity"),
         )
         for item in data.get("cast", [])
         if not filters.is_self_appearance(item.get("character"), item.get("name"))
@@ -113,6 +114,7 @@ def _tv_cast(data: dict) -> tuple[list[CastMember], list[CastMember]]:
                 order=item.get("order", 999),
                 profile_path=item.get("profile_path"),
                 episode_count=item.get("total_episode_count"),
+                popularity=item.get("popularity"),
             )
         )
 

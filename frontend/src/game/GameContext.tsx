@@ -16,6 +16,8 @@ import { patchDailyResult, recordDailyResult } from '../daily'
 import type { Badge } from '../achievements'
 import { evaluateUnlockedBadges } from '../achievements'
 import { readPrefs, writePrefs } from '../prefs'
+import type { LevelId, MediaMix } from '../levels'
+import { levelInfo } from '../levels'
 
 /** Default for the setup screen shown when entering the game — can be changed. */
 export const DEFAULT_DURATION_SECONDS = 180
@@ -84,6 +86,14 @@ interface GameContextValue {
   setExcludeAnimation: (value: boolean) => void
   /** Whether the game in progress was started with animation left out */
   gameExcludesAnimation: boolean
+  /** Setup-screen choice: free-play level ("How cinephile are you?"). Remembered per browser. */
+  level: LevelId
+  setLevel: (value: LevelId) => void
+  /** Level of the game in progress — the daily brings its own */
+  gameLevel: LevelId
+  /** Setup-screen choice: movies only, TV only or both. Remembered per browser. */
+  media: MediaMix
+  setMedia: (value: MediaMix) => void
   hint: Hint | null
   hintStatus: HintStatus
   hintsUsed: number
@@ -127,6 +137,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<Badge[]>([])
   const [excludeAnimation, setExcludeAnimationState] = useState(() => readPrefs().excludeAnimation)
   const [gameExcludesAnimation, setGameExcludesAnimation] = useState(false)
+  const [level, setLevelState] = useState<LevelId>(() => readPrefs().level)
+  const [gameLevel, setGameLevel] = useState<LevelId>(level)
+  const [media, setMediaState] = useState<MediaMix>(() => readPrefs().media)
+  const [gameMedia, setGameMedia] = useState<MediaMix>('mixed')
   const [hint, setHint] = useState<Hint | null>(null)
   const [hintStatus, setHintStatus] = useState<HintStatus>('idle')
   const [hintsUsed, setHintsUsed] = useState(0)
@@ -134,6 +148,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const setExcludeAnimation = useCallback((value: boolean) => {
     setExcludeAnimationState(value)
     writePrefs({ ...readPrefs(), excludeAnimation: value })
+  }, [])
+
+  const setLevel = useCallback((value: LevelId) => {
+    setLevelState(value)
+    writePrefs({ ...readPrefs(), level: value })
+  }, [])
+
+  const setMedia = useCallback((value: MediaMix) => {
+    setMediaState(value)
+    writePrefs({ ...readPrefs(), media: value })
   }, [])
 
   const moves = chain.filter((node) => node.kind === 'actor').length
@@ -187,6 +211,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       nextMode: GameMode,
       duration: number | null,
       skipAnimation: boolean,
+      nextLevel: LevelId,
+      nextMedia: MediaMix,
     ) => {
       void (async () => {
         endingRef.current = false
@@ -203,11 +229,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setNewlyUnlockedBadges([])
         resetHints()
         setGameExcludesAnimation(skipAnimation)
+        setGameLevel(nextLevel)
+        setGameMedia(nextMedia)
         setDurationSeconds(nextMode === 'daily' ? null : duration)
         try {
           const response = await fetchGame()
           setGame(response)
-          if (nextMode === 'daily') setDaily(response as DailyGameResponse)
+          if (nextMode === 'daily') {
+            setDaily(response as DailyGameResponse)
+            setGameLevel((response as DailyGameResponse).level ?? 'buff')
+          }
           setChain([{ kind: 'media', media: response.start }])
           setCurrentMedia(response.start)
           setStartedAt(Date.now())
@@ -224,11 +255,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const startNewGame = useCallback(
     (duration: number | null = durationSeconds) =>
-      startGame(() => getNewGame(excludeAnimation), 'free', duration, excludeAnimation),
-    [startGame, durationSeconds, excludeAnimation],
+      startGame(
+        () => getNewGame(level, excludeAnimation, media),
+        'free',
+        duration,
+        excludeAnimation,
+        level,
+        media,
+      ),
+    [startGame, durationSeconds, excludeAnimation, level, media],
   )
   // The daily is the same puzzle for everyone, so it never leaves anything out.
-  const startDailyGame = useCallback(() => startGame(getDailyGame, 'daily', null, false), [startGame])
+  // Its level comes with the response (a random one each day).
+  const startDailyGame = useCallback(
+    () => startGame(getDailyGame, 'daily', null, false, 'buff', 'mixed'),
+    [startGame],
+  )
 
   /** To change the setup: abandons the game and returns to the /play setup screen. */
   const resetToSetup = useCallback(() => {
@@ -256,10 +298,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
           setSelectedActor(actor)
           // Titles already visited are no longer removed from the list — the player
           // can bring the chain back to the same title if they want.
+          // Keep to what the player chose on the setup screen (free play only).
           setCredits(
-            gameExcludesAnimation
-              ? response.credits.filter((credit) => !credit.is_animation)
-              : response.credits,
+            response.credits.filter(
+              (credit) =>
+                !(gameExcludesAnimation && credit.is_animation) &&
+                (gameMedia === 'mixed' || credit.media_type === gameMedia),
+            ),
           )
           setStatus('picking-media')
         } catch (err) {
@@ -268,7 +313,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
       })()
     },
-    [gameExcludesAnimation],
+    [gameExcludesAnimation, gameMedia],
   )
 
   const backToCast = useCallback(() => {
@@ -295,7 +340,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setHintStatus('loading')
     void (async () => {
       try {
-        const path = await getSolution(currentMedia, current.target, gameExcludesAnimation)
+        const path = await getSolution(currentMedia, current.target, gameLevel, gameExcludesAnimation, gameMedia)
         const step = path.steps[0]
         if (!step) {
           setHintStatus('unavailable')
@@ -308,7 +353,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setHintStatus('unavailable')
       }
     })()
-  }, [currentMedia, hint, hintStatus, status, selectedActor, backToCast, gameExcludesAnimation])
+  }, [
+    currentMedia,
+    hint,
+    hintStatus,
+    status,
+    selectedActor,
+    backToCast,
+    gameExcludesAnimation,
+    gameLevel,
+    gameMedia,
+  ])
 
   const selectMedia = useCallback(
     (credit: CreditItem) => {
@@ -349,6 +404,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           at: winAt,
           usedDirector,
           hints: hintsUsed,
+          level: gameLevel,
         })
         if (daily) {
           recordDailyResult({
@@ -362,6 +418,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             at: winAt,
             usedDirector,
             hints: hintsUsed,
+            levelName: levelInfo(gameLevel).name,
           })
         }
 
@@ -374,7 +431,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // can only be known after this arrives, so it's evaluated here.
         void (async () => {
           try {
-            const sol = await getSolution(game.start, game.target, gameExcludesAnimation)
+            const sol = await getSolution(game.start, game.target, gameLevel, gameExcludesAnimation, gameMedia)
             setSolution(sol)
             // A hinted game was shown the way, so it doesn't earn the "Shortest Path" badge.
             if (sol && sol.hops === finalMoves && hintsUsed === 0) {
@@ -395,7 +452,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       void loadCast(media)
     },
-    [selectedActor, game, daily, startedAt, elapsed, loadCast, hintsUsed, gameExcludesAnimation],
+    [
+      selectedActor,
+      game,
+      daily,
+      startedAt,
+      elapsed,
+      loadCast,
+      hintsUsed,
+      gameExcludesAnimation,
+      gameLevel,
+      gameMedia,
+    ],
   )
 
   /**
@@ -410,13 +478,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
       endingRef.current = true
       setStatus('loading')
       try {
-        setSolution(await getSolution(current.start, current.target, gameExcludesAnimation))
+        setSolution(await getSolution(current.start, current.target, gameLevel, gameExcludesAnimation, gameMedia))
       } catch {
         setSolution(null)
       }
       setStatus(nextStatus)
     },
-    [gameExcludesAnimation],
+    [gameExcludesAnimation, gameLevel, gameMedia],
   )
 
   const giveUp = useCallback(() => {
@@ -456,6 +524,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       excludeAnimation,
       setExcludeAnimation,
       gameExcludesAnimation,
+      level,
+      setLevel,
+      gameLevel,
+      media,
+      setMedia,
       hint,
       hintStatus,
       hintsUsed,
@@ -491,6 +564,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       excludeAnimation,
       setExcludeAnimation,
       gameExcludesAnimation,
+      level,
+      setLevel,
+      gameLevel,
+      media,
+      setMedia,
       hint,
       hintStatus,
       hintsUsed,

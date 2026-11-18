@@ -60,3 +60,4 @@ There's also a **daily puzzle** (the same matchup for everyone, one try per day)
 - Logo stars: based on [Pixel Art Animated Star](https://soulofkiran.itch.io/pixel-art-animated-star) by Narik, recolored. Free for personal and commercial use.
 - Click sound: from the author's portfolio site.
 - Drifting starfield background: technique adapted from a [Uiverse.io](https://uiverse.io) starfield by sinful_9361 (MIT).
+- Badge icons: [Pixel Icon Library](https://github.com/hackernoon/pixel-icon-library) by HackerNoon, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

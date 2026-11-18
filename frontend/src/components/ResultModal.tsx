@@ -3,6 +3,7 @@ import type { MediaBrief, SolutionResponse } from '../types'
 import type { Badge } from '../achievements'
 import { formatDuration } from '../stats'
 import MediaCard from './MediaCard'
+import BadgeIcon from './BadgeIcon'
 
 interface ResultModalProps {
   status: 'won' | 'gave-up' | 'timeout'
@@ -13,6 +14,8 @@ interface ResultModalProps {
   newBadges: Badge[]
   /** Hints used during the game */
   hints?: number
+  /** Free-play level name, shown on the ticket and in the share text */
+  levelName?: string
   start: MediaBrief
   target: MediaBrief
   onClose: () => void
@@ -24,6 +27,7 @@ function buildShareText(
   moves: number,
   seconds: number,
   hints: number,
+  levelName?: string,
 ): string {
   const outcome = status === 'won' ? '◎' : '✕'
   const rail = `■${'━●'.repeat(Math.min(moves, 12))}━${outcome}`
@@ -32,7 +36,8 @@ function buildShareText(
       ? `Connected in ${moves} ${moves === 1 ? 'move' : 'moves'} · ${formatDuration(seconds)}`
       : `${status === 'timeout' ? 'Ran out of time' : 'Gave up'} after ${moves} ${moves === 1 ? 'move' : 'moves'}`
   const hintNote = hints > 0 ? ` · ✧ ${hints}` : ''
-  return ['starlinked', rail, `${line}${hintNote}`, window.location.origin].join('\n')
+  const header = levelName ? `starlinked · ${levelName}` : 'starlinked'
+  return [header, rail, `${line}${hintNote}`, window.location.origin].join('\n')
 }
 
 /** Wordle-style result ticket — a dismissible pop-up shown when the game ends. */
@@ -43,6 +48,7 @@ export default function ResultModal({
   solution,
   newBadges,
   hints = 0,
+  levelName,
   start,
   target,
   onClose,
@@ -66,7 +72,7 @@ export default function ResultModal({
   }, [onClose])
 
   async function handleShare() {
-    const text = buildShareText(status, moves, seconds, hints)
+    const text = buildShareText(status, moves, seconds, hints, levelName)
     try {
       if (navigator.share) {
         await navigator.share({ text })
@@ -106,6 +112,7 @@ export default function ResultModal({
           <span className={`ticket-eyebrow${isWin ? '' : ' ticket-eyebrow--muted'}`}>
             {isWin ? 'Connected' : status === 'timeout' ? 'Time\'s up' : 'You gave up'}
           </span>
+          {levelName && <span className="ticket-level">{levelName}</span>}
           <h2 className="ticket-title">{isWin ? 'You reached the target' : 'Not this time'}</h2>
 
           <dl className="ticket-info">
@@ -141,7 +148,7 @@ export default function ResultModal({
             <div className="ticket-badges">
               {newBadges.map((badge) => (
                 <span key={badge.id} className="ticket-badge-chip">
-                  {badge.icon} New badge: {badge.title}
+                  <BadgeIcon src={badge.icon} /> New badge: {badge.title}
                 </span>
               ))}
             </div>

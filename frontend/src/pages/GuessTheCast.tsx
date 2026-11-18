@@ -9,10 +9,13 @@ function mediaKey(media: MediaBrief): string {
   return `${media.media_type}:${media.id}`
 }
 
+/** A round opens with this many cast photos showing. */
+const STARTING_CLUES = 2
+
 function tier(revealedCount: number): string {
-  if (revealedCount <= 1) return 'Legendary'
-  if (revealedCount === 2) return 'Great'
-  if (revealedCount === 3) return 'Nice work'
+  if (revealedCount <= STARTING_CLUES) return 'Legendary'
+  if (revealedCount === STARTING_CLUES + 1) return 'Great'
+  if (revealedCount === STARTING_CLUES + 2) return 'Nice work'
   return 'Completed'
 }
 
@@ -27,14 +30,14 @@ export default function GuessTheCast() {
   const [round, setRound] = useState<MCQRoundResponse | null>(null)
   const [status, setStatus] = useState<Status>('loading')
   const [error, setError] = useState<string | null>(null)
-  const [revealedCount, setRevealedCount] = useState(1)
+  const [revealedCount, setRevealedCount] = useState(STARTING_CLUES)
   const [wrongIds, setWrongIds] = useState<Set<string>>(new Set())
   const [best, setBest] = useState(() => getBestGuessCastResult())
 
   async function loadRound() {
     setStatus('loading')
     setError(null)
-    setRevealedCount(1)
+    setRevealedCount(STARTING_CLUES)
     setWrongIds(new Set())
     try {
       const response = await getMcqRound()

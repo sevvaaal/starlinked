@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { CastMember } from '../types'
 import { profileUrl, initials } from '../images'
+import HintButton from './HintButton'
 
 interface ActorPickerProps {
   cast: CastMember[]
@@ -59,6 +60,7 @@ export default function ActorPicker({
             Pick an actor from the cast of{' '}
             <span className="picker-subject picker-subject--pink">{currentTitle}</span>
           </h2>
+          <HintButton />
         </div>
 
         {directors.length > 0 && (

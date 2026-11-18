@@ -8,6 +8,7 @@ import type { GameRecord } from './stats'
 import { getAllWins } from './stats'
 import type { DailyResult } from './daily'
 import { getAllDailyResults, getDailyStats, puzzleDateNow } from './daily'
+import { BADGE_ICONS } from './assets/badges'
 
 export type BadgeTone = 'pink' | 'mint' | 'yellow' | 'lilac'
 
@@ -15,6 +16,7 @@ export interface Badge {
   id: string
   title: string
   description: string
+  /** Image URL of the badge's pixel icon */
   icon: string
   tone: BadgeTone
 }
@@ -47,7 +49,7 @@ const CATALOG: BadgeDef[] = [
     id: 'first-link',
     title: 'First Link',
     description: 'Completed your first chain.',
-    icon: '◎',
+    icon: BADGE_ICONS['first-link'],
     tone: 'pink',
     isUnlocked: (d) => d.totalWins >= 1,
   },
@@ -55,7 +57,7 @@ const CATALOG: BadgeDef[] = [
     id: 'legendary-move',
     title: 'Legendary Move',
     description: 'Reached the target in 2 moves or fewer.',
-    icon: '✦',
+    icon: BADGE_ICONS['legendary-move'],
     tone: 'yellow',
     isUnlocked: (d) => d.records.some((r) => r.moves <= 2),
   },
@@ -63,7 +65,7 @@ const CATALOG: BadgeDef[] = [
     id: 'lightning',
     title: 'Lightning Fast',
     description: 'Won in under 30 seconds.',
-    icon: 'ϟ',
+    icon: BADGE_ICONS['lightning'],
     tone: 'yellow',
     isUnlocked: (d) => d.records.some((r) => r.seconds <= 30),
   },
@@ -71,7 +73,7 @@ const CATALOG: BadgeDef[] = [
     id: 'five-wins',
     title: 'Link Apprentice',
     description: 'Completed 5 games.',
-    icon: 'Ⅴ',
+    icon: BADGE_ICONS['five-wins'],
     tone: 'mint',
     isUnlocked: (d) => d.totalWins >= 5,
   },
@@ -79,7 +81,7 @@ const CATALOG: BadgeDef[] = [
     id: 'twenty-five-wins',
     title: 'Link Master',
     description: 'Completed 25 games.',
-    icon: 'ⅩⅩⅤ',
+    icon: BADGE_ICONS['twenty-five-wins'],
     tone: 'mint',
     isUnlocked: (d) => d.totalWins >= 25,
   },
@@ -87,7 +89,7 @@ const CATALOG: BadgeDef[] = [
     id: 'hundred-wins',
     title: 'Link Legend',
     description: 'Completed 100 games.',
-    icon: 'Ⅽ',
+    icon: BADGE_ICONS['hundred-wins'],
     tone: 'pink',
     isUnlocked: (d) => d.totalWins >= 100,
   },
@@ -95,7 +97,7 @@ const CATALOG: BadgeDef[] = [
     id: 'three-day-streak',
     title: 'Habit Forming',
     description: 'Played the daily puzzle 3 days in a row.',
-    icon: '③',
+    icon: BADGE_ICONS['three-day-streak'],
     tone: 'mint',
     isUnlocked: (d) => d.bestStreak >= 3,
   },
@@ -103,7 +105,7 @@ const CATALOG: BadgeDef[] = [
     id: 'seven-day-streak',
     title: 'Week-Long Streak',
     description: 'Solved the daily puzzle 7 days in a row.',
-    icon: '⑦',
+    icon: BADGE_ICONS['seven-day-streak'],
     tone: 'mint',
     isUnlocked: (d) => d.bestStreak >= 7,
   },
@@ -111,7 +113,7 @@ const CATALOG: BadgeDef[] = [
     id: 'thirty-day-streak',
     title: 'Monthly Champion',
     description: 'Solved the daily puzzle 30 days in a row.',
-    icon: '㉚',
+    icon: BADGE_ICONS['thirty-day-streak'],
     tone: 'pink',
     isUnlocked: (d) => d.bestStreak >= 30,
   },
@@ -119,7 +121,7 @@ const CATALOG: BadgeDef[] = [
     id: 'perfect-five',
     title: 'Perfect Five',
     description: 'Solved 5 daily puzzles at or under par.',
-    icon: '★',
+    icon: BADGE_ICONS['perfect-five'],
     tone: 'yellow',
     isUnlocked: (d) => d.perfectDays >= 5,
   },
@@ -127,7 +129,7 @@ const CATALOG: BadgeDef[] = [
     id: 'shortest-path',
     title: 'Shortest Path',
     description: 'Completed a chain in the fewest possible moves.',
-    icon: '⌖',
+    icon: BADGE_ICONS['shortest-path'],
     tone: 'lilac',
     isUnlocked: (d) => d.records.some((r) => r.optimal === true),
   },
@@ -135,7 +137,7 @@ const CATALOG: BadgeDef[] = [
     id: 'director-bridge',
     title: 'Director Bridge',
     description: 'Used a director as a link in your chain.',
-    icon: '▶',
+    icon: BADGE_ICONS['director-bridge'],
     tone: 'lilac',
     isUnlocked: (d) => d.records.some((r) => r.usedDirector === true),
   },

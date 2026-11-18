@@ -4,9 +4,9 @@
  * mechanic and scale, and for now it only shows a personal best.
  */
 
-const STORAGE_KEY = 'starlinked:guess-cast:v1'
-/** Key used before the rename to Starlinked — still read so existing scores carry over. */
-const LEGACY_STORAGE_KEY = 'dizilink:guess-cast:v1'
+// v2: rounds now open with 2 photos instead of 1, so older bests (often "1 clue")
+// can't be compared and are left behind.
+const STORAGE_KEY = 'starlinked:guess-cast:v2'
 
 export interface GuessCastResult {
   /** How many actor photos it took — lower is better */
@@ -17,7 +17,7 @@ export interface GuessCastResult {
 
 function read(): GuessCastResult | null {
   try {
-    const raw = (localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY))
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<GuessCastResult>
     if (typeof parsed.revealedCount !== 'number' || typeof parsed.at !== 'number') return null

@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 import { useGame } from '../game/GameContext'
 import { getSummary } from '../stats'
 import { getDailyResult, getDailyStats, puzzleDateNow } from '../daily'
-import pinkStar from '../assets/stars/pink.svg'
-import mintStar from '../assets/stars/mint.svg'
+import { useState } from 'react'
+import { STAR_IMAGES } from '../assets/stars'
 
-/** Colors of the static stars around the title, in the order the CSS places them */
-const HERO_STARS = ['pink', 'mint', 'pink', 'mint', 'mint', 'pink'] as const
+/** How many static stars sit around the title (the CSS places them) */
+const HERO_STAR_COUNT = 6
 
 const STEPS = [
   {
@@ -30,6 +30,10 @@ const STEPS = [
 ] as const
 
 export default function Home() {
+  // Each visit gets its own mix of star colors.
+  const [heroStars] = useState(() =>
+    Array.from({ length: HERO_STAR_COUNT }, () => STAR_IMAGES[Math.floor(Math.random() * STAR_IMAGES.length)]),
+  )
   const { isActive, moves } = useGame()
   const summary = getSummary()
   const today = puzzleDateNow()
@@ -39,11 +43,11 @@ export default function Home() {
   return (
     <div className="page page--home">
       <section className="hero">
-        {HERO_STARS.map((tone, index) => (
+        {heroStars.map((image, index) => (
           <img
             key={index}
             className={`hero-star hero-star--${index + 1}`}
-            src={tone === 'pink' ? pinkStar : mintStar}
+            src={image}
             alt=""
             aria-hidden="true"
           />

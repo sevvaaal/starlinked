@@ -1,3 +1,5 @@
+import type { LevelId } from './levels'
+
 export type MediaType = 'movie' | 'tv'
 
 export interface MediaBrief {
@@ -17,6 +19,8 @@ export interface DailyGameResponse extends NewGameResponse {
   date: string
   /** Which daily puzzle number this is */
   number: number
+  /** Today's difficulty level — a random one each day */
+  level: LevelId
   /** Par — the shortest path in the pool graph */
   par: number
   /** Seconds until the next puzzle */

@@ -1,3 +1,7 @@
+import type { LevelId } from './levels'
+import type { MediaMix } from './levels'
+import { DEFAULT_LEVEL, isLevelId, isMediaMix } from './levels'
+
 /**
  * Small per-browser settings the player chose on the setup screen.
  * Like the stats, they live in localStorage and fail quietly without it.
@@ -10,9 +14,13 @@ export interface Prefs {
   excludeAnimation: boolean
   /** The hover "tik" sound */
   soundOn: boolean
+  /** Free-play level picked on the setup screen */
+  level: LevelId
+  /** Free play: movies only, TV only, or both */
+  media: MediaMix
 }
 
-const DEFAULTS: Prefs = { excludeAnimation: false, soundOn: true }
+const DEFAULTS: Prefs = { excludeAnimation: false, soundOn: true, level: DEFAULT_LEVEL, media: 'mixed' }
 
 export function readPrefs(): Prefs {
   try {
@@ -23,6 +31,8 @@ export function readPrefs(): Prefs {
       excludeAnimation:
         typeof parsed.excludeAnimation === 'boolean' ? parsed.excludeAnimation : DEFAULTS.excludeAnimation,
       soundOn: typeof parsed.soundOn === 'boolean' ? parsed.soundOn : DEFAULTS.soundOn,
+      level: isLevelId(parsed.level) ? parsed.level : DEFAULTS.level,
+      media: isMediaMix(parsed.media) ? parsed.media : DEFAULTS.media,
     }
   } catch {
     return DEFAULTS

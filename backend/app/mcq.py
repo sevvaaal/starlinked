@@ -16,10 +16,9 @@ from .schemas import CastMember, MediaBrief
 OPTION_COUNT = 4
 DISTRACTOR_COUNT = OPTION_COUNT - 1
 
-# With 4 options there can be at most 3 wrong guesses: 1 initial + at most 3
-# extra reveals = 4 total. A 5th reveal can never trigger, so the cap lives
-# here too.
-CAST_REVEAL_COUNT = 4
+# A round opens with 2 photos. With 4 options there can be at most 3 wrong
+# guesses, each revealing one more: 2 + 3 = 5 photos at most.
+CAST_REVEAL_COUNT = 5
 
 # Retry limit for when a title's cast has too few photos.
 MAX_PICK_ATTEMPTS = 8

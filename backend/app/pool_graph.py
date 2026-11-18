@@ -18,10 +18,10 @@ import random
 from . import lookups, media_pool
 from .cache import graph_cache
 from .config import Settings
+from .levels import DEFAULT_LEVEL, LevelName, get_level
 
 MediaKey = tuple[str, int]
 
-GRAPH_KEY = "pool_graph"
 MAX_CONCURRENT_REQUESTS = 15
 
 # A target this many "shared actor" hops away from the start: far enough to be
@@ -31,7 +31,8 @@ MAX_HOPS = 4
 START_ATTEMPTS = 40
 
 _semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
-_build_lock = asyncio.Lock()
+# One lock per level, so building the big cinephile graph doesn't block casual games.
+_build_locks: dict[str, asyncio.Lock] = {}
 
 
 class PoolGraph:
@@ -49,6 +50,14 @@ class PoolGraph:
     def animated_keys(self) -> frozenset[MediaKey]:
         """Pool titles that are animated — left out when a player opts out of them."""
         return frozenset(key for key, item in self.media_by_key.items() if item.get("is_animation"))
+
+    def excluded_keys(self, exclude_animation: bool = False, media: str = "mixed") -> frozenset[MediaKey]:
+        """Titles a game must avoid: animated ones if asked, and the other media type
+        when the player wants only movies or only series."""
+        excluded = set(self.animated_keys) if exclude_animation else set()
+        if media in ("movie", "tv"):
+            excluded |= {key for key in self.media_by_key if key[0] != media}
+        return frozenset(excluded)
 
     def neighbours(self, key: MediaKey, excluded: frozenset[MediaKey] = frozenset()) -> set[MediaKey]:
         """Titles sharing at least one cast member with `key`, minus `excluded`."""
@@ -130,8 +139,9 @@ async def _fetch_cast(key: MediaKey):
         return key, await lookups.get_media_cast(media_type, media_id)
 
 
-async def _build_graph(settings: Settings) -> PoolGraph:
-    pool = await media_pool.get_media_pool(settings)
+async def _build_graph(settings: Settings, level: LevelName) -> PoolGraph:
+    definition = get_level(level, settings.pool_vote_count_gte, settings.pool_pages_to_fetch)
+    pool = await media_pool.get_media_pool(settings, level)
     media_by_key = {(item["media_type"], item["id"]): item for item in pool}
 
     results = await asyncio.gather(
@@ -144,7 +154,12 @@ async def _build_graph(settings: Settings) -> PoolGraph:
         if isinstance(result, BaseException):
             continue  # one unavailable title shouldn't sink the whole graph
         key, cast_response = result
-        actor_ids = {member.person_id for member in cast_response.cast}
+        # Only cast members this level accepts as links join two titles in the graph.
+        actor_ids = {
+            member.person_id
+            for position, member in enumerate(cast_response.cast)
+            if definition.links_through(position, member)
+        }
         media_to_actors[key] = actor_ids
         for actor_id in actor_ids:
             actor_to_media.setdefault(actor_id, set()).add(key)
@@ -152,27 +167,32 @@ async def _build_graph(settings: Settings) -> PoolGraph:
     return PoolGraph(media_by_key, media_to_actors, actor_to_media)
 
 
-async def get_pool_graph(settings: Settings) -> PoolGraph:
+async def get_pool_graph(settings: Settings, level: LevelName = DEFAULT_LEVEL) -> PoolGraph:
     """The cached pool graph, building it on first use.
 
     The lock (plus the re-check inside it) means concurrent callers wait for
     one build instead of each kicking off their own few-hundred-request run.
     """
-    cached = graph_cache.get(GRAPH_KEY)
+    cache_key = f"pool_graph:{level}"
+    cached = graph_cache.get(cache_key)
     if cached is not None:
         return cached
 
-    async with _build_lock:
-        cached = graph_cache.get(GRAPH_KEY)
+    async with _build_locks.setdefault(level, asyncio.Lock()):
+        cached = graph_cache.get(cache_key)
         if cached is not None:
             return cached
-        graph = await _build_graph(settings)
-        graph_cache.set(GRAPH_KEY, graph)
+        graph = await _build_graph(settings, level)
+        graph_cache.set(cache_key, graph)
         return graph
 
 
 def pick_seeded_pair(
-    graph: PoolGraph, rng: random.Random, excluded: frozenset[MediaKey] = frozenset()
+    graph: PoolGraph,
+    rng: random.Random,
+    excluded: frozenset[MediaKey] = frozenset(),
+    min_hops: int = MIN_HOPS,
+    max_hops: int = MAX_HOPS,
 ) -> tuple[dict, dict, int] | None:
     """A start, a target reachable from it, and the shortest hop count between them.
 
@@ -184,7 +204,7 @@ def pick_seeded_pair(
     rng.shuffle(keys)
 
     for start_key in keys[:START_ATTEMPTS]:
-        candidates = sorted(graph.reachable_with_depth(start_key, MIN_HOPS, MAX_HOPS, excluded))
+        candidates = sorted(graph.reachable_with_depth(start_key, min_hops, max_hops, excluded))
         if candidates:
             target_key, hops = rng.choice(candidates)
             return graph.media_by_key[start_key], graph.media_by_key[target_key], hops
@@ -193,15 +213,19 @@ def pick_seeded_pair(
 
 
 def pick_connectable_pair(
-    graph: PoolGraph, exclude_animation: bool = False
+    graph: PoolGraph,
+    exclude_animation: bool = False,
+    min_hops: int = MIN_HOPS,
+    max_hops: int = MAX_HOPS,
+    media: str = "mixed",
 ) -> tuple[dict, dict] | None:
     """A random start plus a target provably reachable from it, or None.
 
     With `exclude_animation`, neither end is animated *and* the guaranteed
     path avoids animated titles, so the game stays solvable without them.
     """
-    excluded = graph.animated_keys if exclude_animation else frozenset()
-    picked = pick_seeded_pair(graph, random.Random(), excluded)
+    excluded = graph.excluded_keys(exclude_animation, media)
+    picked = pick_seeded_pair(graph, random.Random(), excluded, min_hops, max_hops)
     if picked is None:
         return None
     start, target, _ = picked

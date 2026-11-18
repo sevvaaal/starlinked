@@ -23,6 +23,8 @@ class DailyGameResponse(BaseModel):
     date: str
     number: int
     """Which daily puzzle number this is — shown in the share text."""
+    level: str = "buff"
+    """Today's difficulty level — drawn at random each day."""
     par: int
     """Shortest possible chain length in moves, over the pool graph."""
     next_in_seconds: int
@@ -39,6 +41,8 @@ class CastMember(BaseModel):
     is_director: bool = False
     episode_count: int | None = None
     """Series only: episodes this person appeared in across the whole run."""
+    popularity: float | None = None
+    """TMDb's popularity score for the person — used to pick recognisable links."""
 
 
 class MediaCastResponse(BaseModel):

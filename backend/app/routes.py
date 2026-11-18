@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from . import daily, lookups, mcq, pool_graph, solution, tmdb_client
 from .config import get_settings
+from .levels import DEFAULT_LEVEL, LevelName, daily_level, get_level
 from .schemas import (
     ActorCreditsResponse,
     DailyGameResponse,
@@ -18,14 +19,21 @@ router = APIRouter()
 
 
 @router.get("/new-game", response_model=NewGameResponse)
-async def new_game(exclude_animation: bool = False):
+async def new_game(
+    exclude_animation: bool = False,
+    level: LevelName = DEFAULT_LEVEL,
+    media: Literal["mixed", "movie", "tv"] = "mixed",
+):
     settings = get_settings()
+    definition = get_level(level)
     try:
-        graph = await pool_graph.get_pool_graph(settings)
+        graph = await pool_graph.get_pool_graph(settings, level)
     except tmdb_client.TMDbError as exc:
         raise HTTPException(502, "TMDb request failed") from exc
 
-    pair = pool_graph.pick_connectable_pair(graph, exclude_animation)
+    pair = pool_graph.pick_connectable_pair(
+        graph, exclude_animation, definition.min_hops, definition.max_hops, media
+    )
     if pair is None:
         raise HTTPException(502, "Could not build a solvable game from TMDb data")
 
@@ -49,6 +57,7 @@ async def daily_game():
     return DailyGameResponse(
         date=day.isoformat(),
         number=daily.puzzle_number(day),
+        level=daily_level(daily.puzzle_number(day)),
         par=par,
         next_in_seconds=daily.seconds_until_next_puzzle(),
         start=MediaBrief(**start),
@@ -63,13 +72,15 @@ async def game_solution(
     target_type: Literal["movie", "tv"],
     target_id: int,
     exclude_animation: bool = False,
+    level: LevelName = DEFAULT_LEVEL,
+    media: Literal["mixed", "movie", "tv"] = "mixed",
 ):
     """A worked answer for a matchup — served when the player gives up, and as
     hints (called with the player's current title as the start)."""
     settings = get_settings()
     try:
-        graph = await pool_graph.get_pool_graph(settings)
-        excluded = graph.animated_keys if exclude_animation else frozenset()
+        graph = await pool_graph.get_pool_graph(settings, level)
+        excluded = graph.excluded_keys(exclude_animation, media)
         answer = await solution.build_solution(
             graph, (start_type, start_id), (target_type, target_id), excluded
         )

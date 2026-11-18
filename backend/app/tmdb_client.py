@@ -44,22 +44,22 @@ async def get_person_combined_credits(person_id: int) -> dict:
     return await _get(f"/person/{person_id}/combined_credits")
 
 
-async def discover_movie(page: int, vote_count_gte: int) -> dict:
+async def discover_movie(page: int, vote_count_gte: int, sort_by: str = "popularity.desc") -> dict:
     return await _get(
         "/discover/movie",
         {
-            "sort_by": "popularity.desc",
+            "sort_by": sort_by,
             "vote_count.gte": vote_count_gte,
             "page": page,
         },
     )
 
 
-async def discover_tv(page: int, vote_count_gte: int) -> dict:
+async def discover_tv(page: int, vote_count_gte: int, sort_by: str = "popularity.desc") -> dict:
     return await _get(
         "/discover/tv",
         {
-            "sort_by": "popularity.desc",
+            "sort_by": sort_by,
             "vote_count.gte": vote_count_gte,
             "page": page,
             "include_null_first_air_dates": "false",

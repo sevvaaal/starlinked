@@ -27,6 +27,8 @@ export interface DailyResult {
   usedDirector?: boolean
   /** Hints used during the game — a hinted game can't count as optimal or perfect */
   hints?: number
+  /** Name of that day's level, for the share text */
+  levelName?: string
 }
 
 function read(): DailyResult[] {
@@ -175,12 +177,14 @@ function formatClock(totalSeconds: number): string {
 /** Share text — no spoilers, no titles mentioned. */
 export function buildShareText(result: DailyResult, url: string): string {
   const perfect = isPerfectDay(result)
+  // Only set on results saved after the daily got levels
+  const levelNote = result.levelName ? ` · ${result.levelName}` : ''
   const rail = `■${'━●'.repeat(Math.min(result.moves, 12))}━◎`
   const parNote = perfect ? ' ★' : ` (par ${result.par})`
   const hintNote = result.hints ? ` · ✧ ${result.hints}` : ''
 
   return [
-    `starlinked · Daily #${result.number}`,
+    `starlinked · Daily #${result.number}${levelNote}`,
     rail,
     `${result.moves} ${result.moves === 1 ? 'move' : 'moves'}${parNote}${hintNote} · ${formatClock(result.seconds)}`,
     url,

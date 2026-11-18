@@ -2327,7 +2327,7 @@
 }
 
 .badge-chip-icon {
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1;
 }
 
@@ -3034,6 +3034,9 @@
 }
 
 .ticket-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 10px;
   font-weight: 800;
   color: var(--ink);
@@ -3101,7 +3104,11 @@
   color: var(--ink-soft);
 }
 
-.ticket-reopen {
+.finished-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
   margin-top: -8px;
 }
 
@@ -3317,4 +3324,129 @@
 .footer {
   position: relative;
   z-index: 1;
+}
+
+/* ── "How cinephile are you?" level picker ── */
+.level-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 640px;
+}
+
+@media (max-width: 640px) {
+  .level-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.level-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px 14px;
+  border: var(--bd);
+  border-radius: var(--r-md);
+  background: var(--paper-2);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: var(--sh-sm);
+  transition:
+    transform var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease),
+    background var(--fast) var(--ease);
+}
+
+.level-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--sh);
+}
+
+.level-card.is-active {
+  box-shadow: var(--sh);
+}
+
+.level-card--1.is-active {
+  background: var(--mint);
+}
+
+.level-card--2.is-active {
+  background: var(--yellow);
+}
+
+.level-card--3.is-active {
+  background: var(--pink);
+}
+
+.level-card-dots {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+
+.level-card-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.level-card-blurb {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.setup-subtitle {
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.setup-note {
+  margin: 0;
+  max-width: 38ch;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+/* Today's level on the daily page, and the level line on the result ticket */
+.daily-level {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--on-field-soft);
+}
+
+.daily-level strong {
+  font-family: var(--font-display);
+  color: var(--yellow);
+}
+
+.ticket-level {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* Single-color pixel icon (badges), tinted with the surrounding text color */
+.badge-icon {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+.ticket-badge-chip .badge-icon {
+  font-size: 14px;
+}
+
+.mini-game-icon .badge-icon {
+  font-size: 22px;
 }

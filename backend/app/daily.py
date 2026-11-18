@@ -11,6 +11,7 @@ import random
 from datetime import date, datetime, time, timedelta, timezone
 
 from . import pool_graph
+from .levels import daily_level, get_level
 from .config import Settings
 
 # The puzzle rolls over at local midnight in Turkey. Fixed +03:00 year round —
@@ -62,8 +63,14 @@ async def get_daily_pair(settings: Settings) -> tuple[dict, dict, int] | None:
         if cached is not None:
             return cached
 
-        graph = await pool_graph.get_pool_graph(settings)
-        picked = pool_graph.pick_seeded_pair(graph, random.Random(f"{SEED_PREFIX}-{key}"))
+        level = get_level(daily_level(puzzle_number(current_puzzle_date())))
+        graph = await pool_graph.get_pool_graph(settings, level.name)
+        picked = pool_graph.pick_seeded_pair(
+            graph,
+            random.Random(f"{SEED_PREFIX}-{key}"),
+            min_hops=level.min_hops,
+            max_hops=level.max_hops,
+        )
         if picked is None:
             return None
 

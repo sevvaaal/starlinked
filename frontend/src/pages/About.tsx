@@ -29,6 +29,21 @@ export default function About() {
           API. Starlinked is an independent project and is not endorsed or certified by TMDB.
           Posters and photos belong to their respective owners.
         </p>
+        <p>
+          Badge icons come from the{' '}
+          <a href="https://github.com/hackernoon/pixel-icon-library" target="_blank" rel="noreferrer noopener">
+            Pixel Icon Library
+          </a>{' '}
+          by HackerNoon (
+          <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer noopener">
+            CC BY 4.0
+          </a>
+          ). The logo stars are based on{' '}
+          <a href="https://soulofkiran.itch.io/pixel-art-animated-star" target="_blank" rel="noreferrer noopener">
+            Pixel Art Animated Star
+          </a>{' '}
+          by Narik.
+        </p>
 
         <h2 className="section-title">Your data</h2>
         <p>

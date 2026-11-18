@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { clearStats, formatDuration, getSummary } from '../stats'
 import { clearDaily, getDailyStats, isPerfectDay, puzzleDateNow } from '../daily'
 import { BADGES, evaluateUnlockedBadges } from '../achievements'
+import { LEVELS, levelInfo } from '../levels'
+import BadgeIcon from '../components/BadgeIcon'
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString('en-US', {
@@ -39,9 +41,7 @@ export default function Stats() {
               key={badge.id}
               className={`badge-chip${unlocked ? ` badge-chip--${badge.tone}` : ' is-locked'}`}
             >
-              <span className="badge-chip-icon" aria-hidden="true">
-                {badge.icon}
-              </span>
+              <BadgeIcon src={badge.icon} className="badge-chip-icon" />
               <span className="badge-chip-title">{badge.title}</span>
               <span className="badge-chip-desc">{badge.description}</span>
             </div>
@@ -156,6 +156,7 @@ export default function Stats() {
               <thead>
                 <tr>
                   <th>Matchup</th>
+                  <th className="num">Level</th>
                   <th className="num">Moves</th>
                   <th className="num">Time</th>
                   <th className="num">Date</th>
@@ -172,6 +173,9 @@ export default function Stats() {
                         </span>
                         <span className="record-target">{record.targetTitle}</span>
                       </span>
+                    </td>
+                    <td className="num dim" title={record.level ? levelInfo(record.level).name : 'Before levels'}>
+                      {record.level ? '★'.repeat(LEVELS.findIndex((l) => l.id === record.level) + 1) : '—'}
                     </td>
                     <td className="num">
                       <span className={record.moves === summary.bestMoves ? 'record-best' : ''}>

@@ -3,6 +3,8 @@
  * Every localStorage access is wrapped in try/catch (private tabs, blocked cookies).
  */
 
+import type { LevelId } from './levels'
+
 const STORAGE_KEY = 'starlinked:stats:v1'
 /** Key used before the rename to Starlinked — still read so existing scores carry over. */
 const LEGACY_STORAGE_KEY = 'dizilink:stats:v1'
@@ -20,6 +22,8 @@ export interface GameRecord {
   usedDirector?: boolean
   /** Hints used during the game — a hinted game can't count as optimal or perfect */
   hints?: number
+  /** Free-play level (missing on games from before levels existed) */
+  level?: LevelId
 }
 
 interface StatsData {
