@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Grandstander:wght@400..900&family=Mochiy+Pop+One&family=Pixelify+Sans:wght@700&display=swap');
 
 /* ==========================================================================
    Design tokens — "sticker / retro OS" style, calm version
@@ -56,8 +56,15 @@
   --fast: 0.12s;
   --med: 0.2s;
 
-  --sans: 'Nunito', system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* Body text. Mochiy Pop One has a single weight, so bold text is synthesized. */
+  --sans: 'Mochiy Pop One', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  /* Section headings and window title bars */
+  --font-display: 'Grandstander', system-ui, sans-serif;
+  /* The big home-page title */
+  --font-hero: var(--sans);
+  /* The "starlinked" logo in the top bar and footer */
+  --font-logo: 'Pixelify Sans', 'Grandstander', system-ui, sans-serif;
 
   font: 16px/1.5 var(--sans);
   font-weight: 600;
@@ -107,6 +114,7 @@ h1,
 h2,
 h3 {
   margin: 0;
+  font-family: var(--font-display);
   font-weight: 900;
   line-height: 1.04;
   letter-spacing: -0.03em;

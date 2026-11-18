@@ -1,0 +1,135 @@
+/* Dev-only font playground — deliberately plain so it doesn't take on the fonts it tests. */
+.fontlab-toggle,
+.fontlab,
+.fontlab * {
+  font-family: system-ui, -apple-system, sans-serif !important;
+}
+
+.fontlab-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #2e2b3f;
+  border-radius: 50%;
+  background: #f8e7a6;
+  color: #2e2b3f;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 3px 3px 0 #2e2b3f;
+  cursor: pointer;
+}
+
+.fontlab {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  width: min(340px, calc(100vw - 32px));
+  padding: 14px;
+  border: 2px solid #2e2b3f;
+  border-radius: 14px;
+  background: #f8f3e8;
+  color: #2e2b3f;
+  box-shadow: 4px 4px 0 #2e2b3f;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.fontlab-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fontlab-note {
+  font-size: 11px;
+  color: #918da5;
+}
+
+.fontlab-x {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fontlab-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fontlab-row label {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.fontlab-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.fontlab-controls select {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1.5px solid #2e2b3f;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+}
+
+.fontlab-controls button,
+.fontlab-actions button {
+  padding: 6px 10px;
+  border: 1.5px solid #2e2b3f;
+  border-radius: 8px;
+  background: #efe8da;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fontlab-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.fontlab-actions button:first-child {
+  flex: 1;
+}
+
+.fontlab-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.fontlab-cats button {
+  padding: 4px 9px;
+  border: 1.5px solid #2e2b3f;
+  border-radius: 999px;
+  background: #efe8da;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fontlab-cats button small {
+  font-size: 10px;
+  color: #918da5;
+}
+
+.fontlab-cats button.is-active {
+  background: #f3a4c6;
+}
+
+.fontlab-cats button.is-active small {
+  color: #2e2b3f;
+}
