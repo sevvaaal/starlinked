@@ -1,7 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useGame } from '../game/GameContext'
 import { getDailyResult, puzzleDateNow } from '../daily'
+import { isSoundOn, setSoundOn } from '../sound'
+import logoUrl from '../assets/logo.svg'
+import Starfield from './Starfield'
 
 const NAV_ITEMS = [
   { to: '/daily', label: 'Daily' },
@@ -16,6 +19,12 @@ export default function Layout() {
   const { pathname } = useLocation()
   // Leave a marker in the menu if today's puzzle hasn't been played yet.
   const dailyPending = getDailyResult(puzzleDateNow()) === null
+  const [soundOn, setSoundOnState] = useState(isSoundOn)
+
+  function toggleSound() {
+    setSoundOn(!soundOn)
+    setSoundOnState(!soundOn)
+  }
 
   // Scroll to the top on page change — otherwise you land in the middle of the new page.
   useEffect(() => {
@@ -24,9 +33,10 @@ export default function Layout() {
 
   return (
     <div className="app">
+      <Starfield />
       <header className="topbar">
         <NavLink to="/" className="brand" aria-label="Starlinked home">
-          <span className="brand-mark" aria-hidden="true" />
+          <img className="brand-logo" src={logoUrl} alt="" aria-hidden="true" />
           <span className="brand-name">starlinked</span>
         </NavLink>
 
@@ -50,6 +60,15 @@ export default function Layout() {
               )}
             </NavLink>
           ))}
+          <button
+            className={`sound-toggle${soundOn ? '' : ' is-off'}`}
+            onClick={toggleSound}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? 'Turn hover sound off' : 'Turn hover sound on'}
+            title={soundOn ? 'Sound on' : 'Sound off'}
+          >
+            ♪
+          </button>
         </nav>
       </header>
 
@@ -60,7 +79,7 @@ export default function Layout() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <span className="brand-mark" aria-hidden="true" />
+            <img className="brand-logo" src={logoUrl} alt="" aria-hidden="true" />
             <span>
               <strong>starlinked</strong>
               <span className="footer-tagline">Link movies and TV shows through shared cast</span>

@@ -197,7 +197,7 @@ export default function FontLab() {
         <button
           onClick={() => set('display', fonts[Math.floor(Math.random() * fonts.length)])}
         >
-          🎲 Random {category ? category.toLowerCase() : 'heading'}
+          ⚄ Random {category ? category.toLowerCase() : 'heading'}
         </button>
         <button onClick={() => setChoice(RESET)}>Reset</button>
       </div>

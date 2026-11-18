@@ -12,7 +12,7 @@ export default function HintButton() {
       disabled={!playing || hintStatus === 'loading'}
       title="Show which actor to pick next. Hints are noted on your result."
     >
-      {hintStatus === 'loading' ? '💡 Thinking…' : '💡 Hint'}
+      {hintStatus === 'loading' ? '✧ Thinking…' : '✧ Hint'}
       {hintsUsed > 0 && <span className="hint-count">{hintsUsed}</span>}
     </button>
   )

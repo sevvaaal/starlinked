@@ -53,3 +53,10 @@ There's also a **daily puzzle** (the same matchup for everyone, one try per day)
 ## Known limitations / future work
 
 - Free-play chain steps are only validated on the client. If something like a scoreboard or leaderboard is added, a server-side check such as `POST /api/validate-step` should be added too.
+
+## Credits
+
+- Movie and TV data: [TMDB](https://www.themoviedb.org). This product uses the TMDB API but is not endorsed or certified by TMDB.
+- Logo stars: based on [Pixel Art Animated Star](https://soulofkiran.itch.io/pixel-art-animated-star) by Narik, recolored. Free for personal and commercial use.
+- Click sound: from the author's portfolio site.
+- Drifting starfield background: technique adapted from a [Uiverse.io](https://uiverse.io) starfield by sinful_9361 (MIT).

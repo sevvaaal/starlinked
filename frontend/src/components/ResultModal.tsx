@@ -25,13 +25,13 @@ function buildShareText(
   seconds: number,
   hints: number,
 ): string {
-  const outcomeEmoji = status === 'won' ? '🎯' : '❌'
-  const rail = `🎬${'🔗'.repeat(Math.min(moves, 12))}${outcomeEmoji}`
+  const outcome = status === 'won' ? '◎' : '✕'
+  const rail = `■${'━●'.repeat(Math.min(moves, 12))}━${outcome}`
   const line =
     status === 'won'
-      ? `Connected in ${moves} ${moves === 1 ? 'move' : 'moves'} · ⏱ ${formatDuration(seconds)}`
+      ? `Connected in ${moves} ${moves === 1 ? 'move' : 'moves'} · ${formatDuration(seconds)}`
       : `${status === 'timeout' ? 'Ran out of time' : 'Gave up'} after ${moves} ${moves === 1 ? 'move' : 'moves'}`
-  const hintNote = hints > 0 ? ` · 💡 ${hints}` : ''
+  const hintNote = hints > 0 ? ` · ✧ ${hints}` : ''
   return ['starlinked', rail, `${line}${hintNote}`, window.location.origin].join('\n')
 }
 
@@ -133,7 +133,7 @@ export default function ResultModal({
 
           {isWin && solution && (
             <p className="ticket-note">
-              {beatenByShorter ? `The shortest path was ${solution.hops} ${solution.hops === 1 ? 'move' : 'moves'}.` : '🏅 You took the shortest path.'}
+              {beatenByShorter ? `The shortest path was ${solution.hops} ${solution.hops === 1 ? 'move' : 'moves'}.` : '★ You took the shortest path.'}
             </p>
           )}
 

@@ -4,7 +4,7 @@ interface MiniGame {
   to: string
   title: string
   description: string
-  emoji: string
+  icon: string
 }
 
 const MINI_GAMES: MiniGame[] = [
@@ -12,7 +12,7 @@ const MINI_GAMES: MiniGame[] = [
     to: '/mini-games/guess-from-cast',
     title: 'Guess from the Cast',
     description: 'Look at the cast photos and pick the right title out of 4 options. Fewer clues means a higher score.',
-    emoji: '🎭',
+    icon: '◎',
   },
 ]
 
@@ -31,7 +31,7 @@ export default function MiniGames() {
         {MINI_GAMES.map((game) => (
           <Link key={game.to} to={game.to} className="step-card mini-game-card">
             <span className="step-num" aria-hidden="true">
-              {game.emoji}
+              {game.icon}
             </span>
             <h2 className="step-title">{game.title}</h2>
             <p className="step-body">{game.description}</p>

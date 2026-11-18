@@ -65,7 +65,7 @@ export default function GameBoard({ onRetry, loadingLabel }: GameBoardProps) {
 
       {hintStatus === 'unavailable' && (status === 'picking-actor' || status === 'picking-media') && (
         <p className="hint-note" role="status">
-          💡 No hint from here — this title isn't linked to the target in our title pool. Try a
+          ✧ No hint from here — this title isn't linked to the target in our title pool. Try a
           different path, or give up to see a solution.
         </p>
       )}

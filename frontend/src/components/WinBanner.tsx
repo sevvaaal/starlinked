@@ -56,7 +56,7 @@ export default function WinBanner({
 
         {hints > 0 && (
           <p className="win-optimal-note">
-            💡 You used {hints} {hints === 1 ? 'hint' : 'hints'} this game.
+            ✧ You used {hints} {hints === 1 ? 'hint' : 'hints'} this game.
           </p>
         )}
 
@@ -67,7 +67,7 @@ export default function WinBanner({
             </p>
           ) : (
             <p className="win-optimal-note win-optimal-note--best">
-              🏅 You took the shortest path — it doesn't get better than that.
+              ★ You took the shortest path — it doesn't get better than that.
             </p>
           ))}
 

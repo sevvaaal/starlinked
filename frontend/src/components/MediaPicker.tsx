@@ -125,12 +125,12 @@ export default function MediaPicker({
                 onClick={() => onSelect(credit)}
               >
                 <div className="pick-card-poster">
-                  {credit === hinted && <span className="hint-badge">💡 Hint</span>}
+                  {credit === hinted && <span className="hint-badge">✧ Hint</span>}
                   {credit.poster_path ? (
                     <img src={posterUrl(credit.poster_path)} alt="" loading="lazy" />
                   ) : (
                     <div className="pick-card-placeholder" aria-hidden="true">
-                      🎬
+                      ✦
                     </div>
                   )}
                   <span className={`type-badge type-badge--${credit.media_type}`}>

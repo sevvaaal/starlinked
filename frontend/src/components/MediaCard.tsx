@@ -27,7 +27,7 @@ export default function MediaCard({
           />
         ) : (
           <div className="media-card-placeholder" aria-hidden="true">
-            🎬
+            ✦
           </div>
         )}
         <span className={`type-badge type-badge--${media.media_type}`}>

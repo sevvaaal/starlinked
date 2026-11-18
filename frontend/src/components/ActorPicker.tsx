@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CastMember } from '../types'
-import { profileUrl } from '../images'
+import { profileUrl, initials } from '../images'
 
 interface ActorPickerProps {
   cast: CastMember[]
@@ -74,7 +74,7 @@ export default function ActorPicker({
                   <img src={profileUrl(director.profile_path, 'w92')} alt="" loading="lazy" />
                 ) : (
                   <span className="director-chip-placeholder" aria-hidden="true">
-                    🎬
+                    {initials(director.name)}
                   </span>
                 )}
                 <span className="director-chip-info">
@@ -115,12 +115,12 @@ export default function ActorPicker({
                 onClick={() => onSelect(member)}
               >
                 <div className="pick-card-poster">
-                  {member === hinted && <span className="hint-badge">💡 Hint</span>}
+                  {member === hinted && <span className="hint-badge">✧ Hint</span>}
                   {member.profile_path ? (
                     <img src={profileUrl(member.profile_path, 'w185')} alt="" loading="lazy" />
                   ) : (
                     <div className="pick-card-placeholder" aria-hidden="true">
-                      🎭
+                      {initials(member.name)}
                     </div>
                   )}
                 </div>

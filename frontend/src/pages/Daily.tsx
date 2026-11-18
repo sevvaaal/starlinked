@@ -206,7 +206,7 @@ export default function Daily() {
             </p>
             {result.hints ? (
               <p className="win-optimal-note">
-                💡 Solved with {result.hints} {result.hints === 1 ? 'hint' : 'hints'}
+                ✧ Solved with {result.hints} {result.hints === 1 ? 'hint' : 'hints'}
               </p>
             ) : null}
 

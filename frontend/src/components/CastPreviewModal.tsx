@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { CastMember, MediaBrief } from '../types'
 import { getMediaCast } from '../api'
-import { posterUrl, profileUrl } from '../images'
+import { posterUrl, profileUrl, initials } from '../images'
 
 interface CastPreviewModalProps {
   media: MediaBrief
@@ -65,7 +65,7 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
                 <img src={posterUrl(media.poster_path)} alt="" loading="lazy" />
               ) : (
                 <div className="pick-card-placeholder" aria-hidden="true">
-                  🎬
+                  ✦
                 </div>
               )}
               <span className={`type-badge type-badge--${media.media_type}`}>
@@ -101,7 +101,7 @@ export default function CastPreviewModal({ media, onClose }: CastPreviewModalPro
                       <img src={profileUrl(member.profile_path, 'w185')} alt="" loading="lazy" />
                     ) : (
                       <div className="pick-card-placeholder" aria-hidden="true">
-                        🎭
+                        {initials(member.name)}
                       </div>
                     )}
                   </div>

@@ -8,9 +8,11 @@ const STORAGE_KEY = 'starlinked:prefs:v1'
 export interface Prefs {
   /** Leave animated movies and series out of free play (voice casts are hard to know). */
   excludeAnimation: boolean
+  /** The hover "tik" sound */
+  soundOn: boolean
 }
 
-const DEFAULTS: Prefs = { excludeAnimation: false }
+const DEFAULTS: Prefs = { excludeAnimation: false, soundOn: true }
 
 export function readPrefs(): Prefs {
   try {
@@ -20,6 +22,7 @@ export function readPrefs(): Prefs {
     return {
       excludeAnimation:
         typeof parsed.excludeAnimation === 'boolean' ? parsed.excludeAnimation : DEFAULTS.excludeAnimation,
+      soundOn: typeof parsed.soundOn === 'boolean' ? parsed.soundOn : DEFAULTS.soundOn,
     }
   } catch {
     return DEFAULTS

@@ -175,14 +175,14 @@ function formatClock(totalSeconds: number): string {
 /** Share text — no spoilers, no titles mentioned. */
 export function buildShareText(result: DailyResult, url: string): string {
   const perfect = isPerfectDay(result)
-  const rail = `🎬${'🔗'.repeat(Math.min(result.moves, 12))}🎯`
-  const parNote = perfect ? ' ⭐' : ` (par ${result.par})`
-  const hintNote = result.hints ? ` · 💡 ${result.hints}` : ''
+  const rail = `■${'━●'.repeat(Math.min(result.moves, 12))}━◎`
+  const parNote = perfect ? ' ★' : ` (par ${result.par})`
+  const hintNote = result.hints ? ` · ✧ ${result.hints}` : ''
 
   return [
     `starlinked · Daily #${result.number}`,
     rail,
-    `${result.moves} ${result.moves === 1 ? 'move' : 'moves'}${parNote}${hintNote} · ⏱ ${formatClock(result.seconds)}`,
+    `${result.moves} ${result.moves === 1 ? 'move' : 'moves'}${parNote}${hintNote} · ${formatClock(result.seconds)}`,
     url,
   ].join('\n')
 }

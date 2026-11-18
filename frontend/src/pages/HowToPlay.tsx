@@ -38,7 +38,7 @@ const TIPS = [
   },
   {
     title: 'Ask for a hint',
-    body: 'The 💡 Hint button marks the actor to pick next on the shortest path, then the title to jump to. Each hint is noted on your result, and a hinted game can\'t count as perfect.',
+    body: 'The ✧ Hint button marks the actor to pick next on the shortest path, then the title to jump to. Each hint is noted on your result, and a hinted game can\'t count as perfect.',
   },
   {
     title: 'Skip animation',

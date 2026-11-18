@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom'
 import { useGame } from '../game/GameContext'
 import { getSummary } from '../stats'
 import { getDailyResult, getDailyStats, puzzleDateNow } from '../daily'
+import pinkStar from '../assets/stars/pink.svg'
+import mintStar from '../assets/stars/mint.svg'
+
+/** Colors of the static stars around the title, in the order the CSS places them */
+const HERO_STARS = ['pink', 'mint', 'pink', 'mint', 'mint', 'pink'] as const
 
 const STEPS = [
   {
@@ -34,10 +39,15 @@ export default function Home() {
   return (
     <div className="page page--home">
       <section className="hero">
-        <span className="sparkle sparkle--1" aria-hidden="true" />
-        <span className="sparkle sparkle--2" aria-hidden="true" />
-        <span className="sparkle sparkle--3" aria-hidden="true" />
-        <span className="sparkle sparkle--4" aria-hidden="true" />
+        {HERO_STARS.map((tone, index) => (
+          <img
+            key={index}
+            className={`hero-star hero-star--${index + 1}`}
+            src={tone === 'pink' ? pinkStar : mintStar}
+            alt=""
+            aria-hidden="true"
+          />
+        ))}
         <span className="hero-eyebrow">Movie & TV connection game</span>
         <h1>
           How many <em className="grad-mint">actors</em> does it take to link two{' '}

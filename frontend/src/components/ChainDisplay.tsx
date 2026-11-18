@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import type { ChainNode } from '../types'
 import MediaCard from './MediaCard'
-import { profileUrl } from '../images'
+import { profileUrl, initials } from '../images'
 
 interface ChainDisplayProps {
   chain: ChainNode[]
@@ -57,7 +57,7 @@ export default function ChainDisplay({ chain, showCurrent = true }: ChainDisplay
                     />
                   ) : (
                     <div className="chain-actor-avatar chain-actor-avatar--placeholder" aria-hidden="true">
-                      🎭
+                      {initials(node.actor.name)}
                     </div>
                   )}
                   <span className="chain-actor-name">{node.actor.name}</span>

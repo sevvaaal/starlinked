@@ -139,9 +139,6 @@ export default function Play() {
             <button className="btn-ghost" onClick={giveUp} title="End the game and see the solution">
               Give up
             </button>
-            <button className="btn-ghost btn-ghost--quiet" onClick={resetToSetup}>
-              Change time limit
-            </button>
           </div>
         </div>
       )}
@@ -176,7 +173,7 @@ export default function Play() {
 
       {showGame && isFinished && game && !ticketOpen && (
         <button className="btn-ghost ticket-reopen" onClick={() => setTicketOpen(true)}>
-          🎟 View ticket again
+          View ticket again
         </button>
       )}
 

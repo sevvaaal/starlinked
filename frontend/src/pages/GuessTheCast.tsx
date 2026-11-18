@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { MCQRoundResponse, MediaBrief } from '../types'
 import { getMcqRound } from '../api'
-import { posterUrl, profileUrl } from '../images'
+import { posterUrl, profileUrl, initials } from '../images'
 import { getBestGuessCastResult, recordGuessCastWin } from '../guessCastStats'
 
 function mediaKey(media: MediaBrief): string {
@@ -144,7 +144,7 @@ export default function GuessTheCast() {
                       <img src={profileUrl(actor.profile_path, 'w185')} alt={actor.name} loading="lazy" />
                     ) : (
                       <div className="pick-card-placeholder" aria-hidden="true">
-                        🎭
+                        {initials(actor.name)}
                       </div>
                     )}
                   </div>
@@ -168,7 +168,7 @@ export default function GuessTheCast() {
                           <img src={posterUrl(option.poster_path)} alt="" loading="lazy" />
                         ) : (
                           <div className="pick-card-placeholder" aria-hidden="true">
-                            🎬
+                            ✦
                           </div>
                         )}
                         <span className={`type-badge type-badge--${option.media_type}`}>
