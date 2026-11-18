@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useGame } from '../game/GameContext'
 import { getDailyResult, puzzleDateNow } from '../daily'
@@ -20,6 +20,9 @@ export default function Layout() {
   // Leave a marker in the menu if today's puzzle hasn't been played yet.
   const dailyPending = getDailyResult(puzzleDateNow()) === null
   const [soundOn, setSoundOnState] = useState(isSoundOn)
+  // Phones fold the menu behind a ☰ button; this is whether it's unfolded.
+  const [menuOpen, setMenuOpen] = useState(false)
+  const topbarRef = useRef<HTMLElement>(null)
 
   function toggleSound() {
     setSoundOn(!soundOn)
@@ -27,20 +30,50 @@ export default function Layout() {
   }
 
   // Scroll to the top on page change — otherwise you land in the middle of the new page.
+  // Picking a page also folds the phone menu back up.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
+    setMenuOpen(false)
   }, [pathname])
+
+  // Close the phone menu on a tap outside the top bar, or on Escape.
+  useEffect(() => {
+    if (!menuOpen) return
+    function onPointerDown(event: PointerEvent) {
+      if (!topbarRef.current?.contains(event.target as Node)) setMenuOpen(false)
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
 
   return (
     <div className="app">
       <Starfield />
-      <header className="topbar">
+      <header className="topbar" ref={topbarRef}>
         <NavLink to="/" className="brand" aria-label="Starlinked home">
           <img className="brand-logo" src={logoUrl} alt="" aria-hidden="true" />
           <span className="brand-name">starlinked</span>
         </NavLink>
 
-        <nav className="nav" aria-label="Main menu">
+        <button
+          className={`menu-toggle${menuOpen ? ' is-open' : ''}`}
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-expanded={menuOpen}
+          aria-controls="main-menu"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+        >
+          {menuOpen ? '✕' : '☰'}
+          {!menuOpen && dailyPending && <span className="nav-dot nav-dot--daily" aria-hidden="true" />}
+        </button>
+
+        <nav id="main-menu" className={`nav${menuOpen ? ' is-open' : ''}`} aria-label="Main menu">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}

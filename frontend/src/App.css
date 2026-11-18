@@ -296,14 +296,67 @@
   }
 }
 
+/* ☰ button: phones only (see below) */
+.menu-toggle {
+  display: none;
+  position: relative;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--on-field-soft);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--on-field);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.menu-toggle.is-open {
+  background: var(--field-hi);
+}
+
+.menu-toggle .nav-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+/* Phones: the menu folds behind the ☰ button and unfolds as a dropdown */
 @media (max-width: 560px) {
-  .brand-name {
+  .menu-toggle {
+    display: grid;
+  }
+
+  .nav {
     display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 12px;
+    left: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 10px;
+    overflow: visible;
+    border: var(--bd);
+    border-radius: var(--r-md);
+    background: var(--field-deep);
+    box-shadow: var(--sh);
+  }
+
+  .nav.is-open {
+    display: flex;
   }
 
   .nav-link {
-    padding: 7px 10px;
-    font-size: 13px;
+    justify-content: space-between;
+    padding: 11px 14px;
+    font-size: 16px;
+  }
+
+  .nav .sound-toggle {
+    align-self: flex-start;
+    margin: 4px 0 0 8px;
   }
 }
 
@@ -3317,13 +3370,6 @@
 
 .footer-brand .brand-logo {
   width: 40px;
-}
-
-/* Page content sits above the drifting starfield */
-.stage,
-.footer {
-  position: relative;
-  z-index: 1;
 }
 
 /* ── "How cinephile are you?" level picker ── */
